@@ -1,0 +1,29 @@
+[
+      {
+        "index": 0,
+        "max": 150,
+        "min": 1,
+        "questionName": "consulKeyPath",
+        "required": true,
+        "type": "text",
+        "variable": "consulKeyPath"
+      },
+      {
+        "index": 1,
+        "max": 150,
+        "min": 1,
+        "questionName": "consulTokenPassword",
+        "required": true,
+        "type": "text",
+        "variable": "consulTokenPassword"
+      },
+      {
+        "index": 2,
+        "max": 50,
+        "min": 1,
+        "questionName": "theUser",
+        "required": true,
+        "type": "text",
+        "variable": "theUser"
+      }
+]

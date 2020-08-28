@@ -1,0 +1,27 @@
+#
+# Create Trusted Certificate
+#
+# Input vars:
+# - apigwMgmtEndpoint
+# - apigwUser
+# - apigwPassword
+# - trustedCertificatePayload
+# Output vars:
+# - apigw_response_create_trustedcertificate
+#
+- name: "create Trusted Certificate"
+  uri:
+    url: '{{ apigwMgmtEndpoint }}/restman/1.0/trustedCertificates'
+    method: POST
+    force_basic_auth: yes
+    user: "{{ apigwUser }}"
+    password: "{{ apigwPassword }}"
+    headers:
+      Content-Type: 'application/xml'
+    validate_certs: no
+    body: "{{ trustedCertificatePayload }}"
+    status_code: 201
+    return_content: yes
+  register: apigw_response_create_trustedcertificate
+  changed_when: apigw_response_create_trustedcertificate is succeeded
+

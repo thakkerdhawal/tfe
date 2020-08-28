@@ -1,0 +1,125 @@
+---
+# tasks file for generic_afServerFileCopy#
+#
+- name: Create local 'files' directory (if it doesn't exist) at location "{{ playbook_dir }}/files/"
+  run_once: true
+  delegate_to: localhost
+  become: false
+  file: path="{{ playbook_dir }}/files/" state=directory
+  tags:
+   - prereq
+   - afServerFileCopy
+
+- name: Generate random string to make AF downloaded filename unique 
+  run_once: true
+  delegate_to: localhost
+  become: false
+  shell: "uuidgen -r | sed 's/-//g'"
+  register: randomString
+  tags:
+   - prereq
+   - afServerFileCopy
+
+- name: Print randomString if verbosity is 2 or greater
+  run_once: true
+  delegate_to: localhost
+  become: false
+  debug: msg="randomString:{{randomString}}" verbosity=2
+  tags:
+   - prereq
+   - afServerFileCopy
+
+- name: Auth Required - get target file info 
+  when: afUser is defined or afToken is defined
+  run_once: true
+  delegate_to: localhost
+  become: false
+  uri:
+   method: HEAD
+   url: "{{ afUrl }}"
+   user: "{{ afUser }}"
+   password: "{{ afToken }}"
+   return_content: false
+   validate_certs: no
+  register: response
+  tags:
+   - getCheckSum
+   - afServerFileCopy
+
+- name: Auth Not Required - get target file info 
+  when: afUser is not defined and afToken is not defined
+  run_once: true
+  delegate_to: localhost
+  become: false
+  uri:
+   method: HEAD
+   url: "{{ afUrl }}"
+   return_content: false
+   validate_certs: no
+  register: response
+  tags:
+   - getCheckSum
+   - afServerFileCopy
+
+- name: Print sha1sum of AF file if verbosity is 2 or greater
+  run_once: true
+  delegate_to: localhost
+  become: false
+  debug: msg="SHA1 checksum is {{ response.x_checksum_sha1 }}" verbosity=2
+  tags:
+   - prereq
+   - afServerFileCopy
+
+- name: Auth Required - Download single file from Artifactory to local Ansible server in the "{{ playbook_dir }}/files/" directory, so Ansible can later copy it to the target host(s)
+  when: afUser is defined or afToken is defined
+  run_once: true
+  delegate_to: localhost
+  become: false
+  get_url:
+   url: "{{ afUrl }}"
+   url_username: "{{ afUser }}"
+   url_password: "{{ afToken }}"
+   dest: "{{ playbook_dir }}/files/{{ afFile }}"
+   checksum: "sha1:{{ response.x_checksum_sha1 }}"
+   validate_certs: no
+  tags:
+   - download
+   - afServerFileCopy
+
+- name: Auth Not Required - Download single file from Artifactory to local Ansible server in the "{{ playbook_dir }}/files/" directory, so Ansible can later copy it to the target host(s)
+  when: afUser is not defined and afToken is not defined
+  run_once: true
+  delegate_to: localhost
+  become: false
+  get_url:
+   url: "{{ afUrl }}"
+   dest: "{{ playbook_dir }}/files/{{ afFile }}"
+   validate_certs: no
+   checksum: "sha1:{{ response.x_checksum_sha1 }}"
+  tags:
+   - download
+   - afServerFileCopy
+
+- name: Copy locally downloaded file to remote host(s)
+  copy: src="{{ playbook_dir }}/files/{{ afFile }}" dest="{{ destFilePath }}" mode="{{ theMode }}" owner="{{ theUser }}" group="{{ theGroup }}" checksum="{{ response.x_checksum_sha1 }}"
+  when: not unarchive
+  tags:
+   - copy
+   - afServerFileCopy
+
+- name: Copy locally downloaded file to remote host(s) and unarchive
+  unarchive: src="{{ playbook_dir }}/files/{{ afFile }}" dest="{{ destFilePath }}" mode="{{ theMode }}" owner="{{ theUser }}" group="{{ theGroup }}" 
+  when: unarchive
+  tags:
+   - copy
+   - unarchive
+   - afServerFileCopy
+
+- name: Remove locally downloaded AF file as part of playbook cleanup
+  run_once: true
+  delegate_to: localhost
+  become: false
+  file: path="{{ playbook_dir }}/files/{{ afFile }}" state=absent
+  tags:
+   - cleanup
+   - afServerFileCopy

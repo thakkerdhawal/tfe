@@ -1,0 +1,28 @@
+#
+# Update Trusted Certificate by ID (create new if doesn't exist)
+#
+# Input vars:
+# - apigwMgmtEndpoint
+# - apigwUser
+# - apigwPassword
+# - trustedCertificateId
+# - trustedCertificatePayload
+# Output vars:
+# - apigw_response_update_trustedcertificate
+#
+- name: "create or update Trusted Certificate by ID"
+  uri:
+    url: '{{ apigwMgmtEndpoint }}/restman/1.0/trustedCertificates/{{ trustedCertificateId }}'
+    method: PUT
+    force_basic_auth: yes
+    user: "{{ apigwUser }}"
+    password: "{{ apigwPassword }}"
+    headers:
+      Content-Type: 'application/xml'
+    validate_certs: no
+    body: "{{ trustedCertificatePayload }}"
+    status_code: 200,201
+    return_content: yes
+  register: apigw_response_update_trustedcertificate
+  changed_when: apigw_response_update_trustedcertificate is succeeded
+

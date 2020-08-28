@@ -1,0 +1,13 @@
+Host ${env_name}-bastion
+     HostName                 ${ip}
+     StrictHostKeyChecking    no
+     ProxyCommand             none
+     CheckHostIP              no
+     ForwardAgent             yes
+     ServerAliveInterval      60
+     IdentityFile             ~/.ssh/${env_name}.pem
+Host 10.8.*
+     ProxyJump                %r@${env_name}-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             ~/.ssh/${env_name}.pem

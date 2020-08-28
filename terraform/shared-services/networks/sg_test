@@ -1,0 +1,30 @@
+# SG - netcool lambdas.
+#resource "aws_security_group" "netcool-lambda-sg" {
+#  name        = "${local.environment}-netcool-lambda-sg"
+#  description = "SG for netcool lambda"
+#  vpc_id      = "${data.aws_vpc.nwmss.id}"
+#  tags = "${merge(local.default_tags, map(
+#    "Name", "${local.environment}-netcool-lambda-sg"
+#  ))}"
+#}
+
+resource "aws_security_group_rule" "netcool-egress-https-test" {
+  security_group_id = "${aws_security_group.netcool-lambda-sg.id}"
+  type              = "egress"
+  description       = "Destination is Campus VIP for netcool lambda"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  source_security_group_id = "${aws_security_group.netcool-lambda-sg.id}"
+}
+
+# This sg rule is only for test purpose as test apache host uses this.
+resource "aws_security_group_rule" "netcool-ingress-https-test" {
+  security_group_id = "${aws_security_group.netcool-lambda-sg.id}"
+  type              = "ingress"
+  description       = "Destination is Campus VIP for netcool lambda"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  source_security_group_id = "${aws_security_group.netcool-lambda-sg.id}"
+}

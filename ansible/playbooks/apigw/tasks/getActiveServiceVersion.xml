@@ -1,0 +1,25 @@
+#
+# The the active service (policy) version - we use version comment to track changes
+#
+# Input vars:
+# - apigwMgmtEndpoint
+# - serviceId
+# - apigwUser
+# - apigwPassword
+# - serviceId
+# Output vars:
+# - apigw_response_get_active_service_version
+#
+- name: "get active version of a service"
+  uri:
+    url: '{{ apigwMgmtEndpoint }}/restman/1.0/services/{{ serviceId }}/versions/active'
+    method: GET
+    force_basic_auth: yes
+    user: "{{ apigwUser }}"
+    password: "{{ apigwPassword }}"
+    headers:
+      Content-Type: 'application/xml'
+    validate_certs: no
+    status_code: 200
+    return_content: yes
+  register: apigw_response_get_active_service_version

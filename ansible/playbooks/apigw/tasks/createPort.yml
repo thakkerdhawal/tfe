@@ -1,0 +1,27 @@
+#
+# Create Listener Port
+#
+# Input vars:
+# - apigwMgmtEndpoint
+# - apigwUser
+# - apigwPassword
+# - portPayload
+#
+# Output vars:
+# - apigw_response_create_port
+#
+- name: "create new listener port"
+  uri:
+    url: "{{ apigwMgmtEndpoint }}/restman/1.0/listenPorts"
+    method: POST
+    force_basic_auth: yes
+    user: '{{ apigwUser }}'
+    password: '{{ apigwPassword }}'
+    headers:
+      Content-Type: 'application/xml'
+    body: "{{ portPayload }}"
+    validate_certs: no
+    status_code: 201
+    return_content: yes
+  register: apigw_response_create_port
+  changed_when: apigw_response_create_port is succeeded

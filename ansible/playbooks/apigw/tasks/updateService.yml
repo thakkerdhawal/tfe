@@ -1,0 +1,26 @@
+#
+# Update service by service ID (create new if doesn't exist)
+#
+# Input vars:
+# - apigwMgmtEndpoint
+# - apigwUser
+# - apigwPassword
+# - serviceId
+# Output vars:
+# - apigw_response_update_service
+#
+- name: "create or update the service"
+  uri:
+    url: '{{ apigwMgmtEndpoint }}/restman/1.0/services/{{ serviceId }}'
+    method: PUT
+    force_basic_auth: yes
+    user: "{{ apigwUser }}"
+    password: "{{ apigwPassword }}"
+    headers:
+      Content-Type: 'application/xml'
+    validate_certs: no
+    body: "{{ servicePayload }}"
+    status_code: 200,201
+    return_content: yes
+  register: apigw_response_update_service
+  changed_when: apigw_response_update_service is succeeded

@@ -1,0 +1,95 @@
+---
+- name: "Check for existing apache instance: {{ apacheInstanceName }}"
+  stat: 
+    path: "{{ destDir }}"
+  register: pre_existing_apache
+  tags: apache 
+
+- name: "Stop run if apache instance already exists and apacheUpdateFlag is set to False"
+  fail:
+     msg: "instance already exists {{ destDir }} so we cannot proceed further"
+  when: 
+     -  pre_existing_apache.stat.exists and not apacheUpdateFlag 
+  tags: apache 
+
+- name: "check if service file exists for :  httpd-{{ apacheInstanceName }}.service"
+  shell: "systemctl -a | grep httpd-{{ apacheInstanceName }}.service"
+  ignore_errors: yes
+  changed_when: false
+  register: service_apache_status
+  tags: apache 
+
+- name: Stop httpd-{{ apacheInstanceName }}.service 
+  ignore_errors: true
+  command: "sudo systemctl stop httpd-{{ apacheInstanceName }}.service"
+  when:
+     -  service_apache_status.rc == 0
+  tags: apache 
+
+- name: "Create apache instance directory"
+  file:
+    path: "{{ destDir }}"
+    state: directory
+    owner: "{{ apacheUser }}"
+    group: "{{ apacheGroup }}"
+  tags: apache 
+
+- name: "Unpack apache archive"
+  unarchive:
+    remote_src: yes
+    src: "{{ packageLocation }}"
+    dest: "{{ destDir }}"
+    owner: "{{ apacheUser }}"
+    group: "{{ apacheGroup }}"
+    mode: 0750
+    list_files: yes
+  register: install_result
+  tags: apache
+
+- name: "Set apacheExec and apacheConf Path"
+  set_fact: 
+    apacheExec: "{{ destDir }}/{{ install_result.files[0] }}/httpd/servers/rbs/bin/httpdctl"
+    apacheConf: "{{ destDir }}/{{ install_result.files[0] }}/httpd/servers/rbs/"
+  tags: apache
+
+- name: "Copy apache instance: {{ apacheInstanceName }} config directory"
+  copy:
+    src : "{{ playbook_dir }}/files/{{ awsEnv }}/{{ apacheInstanceName }}/conf/"
+    dest: "{{ apacheConf }}/conf"
+    owner: "{{ apacheUser }}"
+    group: "{{ apacheGroup }}"
+    mode: 0644
+  tags: 
+    - apache 
+    - copy
+
+- name: "Apply SELinux file context to apache instance dir {{ destDir }}" 
+  command: "/usr/sbin/restorecon -irv {{ destDir }}"
+
+- name: "Grab port from httpd-ssl.conf for selinux config "
+  shell: "grep -v '#' {{ apacheConf }}/conf/extra/httpd-ssl.conf  | grep -i 'listen' | cut -d ' ' -f 2"
+  register: httpdSSLPort 
+  tags: apache
+
+- name: "Set apachePort"
+  set_fact: 
+    apachePort: "{{ httpdSSLPort.stdout_lines[0] }}"
+  tags: apache
+
+- name: "create intance link to current dir"
+  file:
+    src: "{{ destDir }}/{{ install_result.files[0] }}" 
+    dest: "{{ destDir }}/current"
+    owner: "{{ apacheUser }}"
+    group: "{{ apacheGroup }}"
+    state: link
+
+- name: "Apply SELinux file context to apache instance dir {{ destDir }}" 
+  command: "/usr/sbin/restorecon -irv {{ destDir }}"
+  tags: 
+    - apache 
+    - selinux 
+
+- name: Make sure {{ apacheInstanceName }}.service is running
+  command: "sudo systemctl start httpd-{{ apacheInstanceName }}.service"
+  tags: apache 

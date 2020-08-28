@@ -1,0 +1,83 @@
+[
+      {
+        "index": 0,
+        "max": 30,
+        "min": 1,
+        "questionName": "awsEnv",
+        "required": true,
+        "type": "text",
+        "variable": "awsEnv"
+      },
+      {
+        "index": 1,
+        "max": 30,
+        "min": 1,
+        "questionName": "awsProfile",
+        "required": true,
+        "type": "text",
+        "variable": "awsProfile"
+      },
+      {
+        "index": 2,
+        "max": 150,
+        "min": 1,
+        "questionName": "r53Zone",
+        "required": true,
+        "type": "text",
+        "variable": "r53Zone"
+      },
+      {
+        "index": 3,
+        "max": 50,
+        "min": 1,
+        "questionName": "r53Record",
+        "required": true,
+        "type": "text",
+        "variable": "r53Record"
+      },
+      {
+        "index": 4,
+        "max": 10,
+        "min": 1,
+        "questionName": "disableEuWest1",
+        "required": true,
+        "type": "text",
+        "variable": "disableEuWest1"
+      },
+      {
+        "index": 5,
+        "max": 10,
+        "min": 1,
+        "questionName": "disableEuWest2",
+        "required": true,
+        "type": "text",
+        "variable": "disableEuWest2"
+      },
+      {
+        "index": 6,
+        "max": 10,
+        "min": 1,
+        "questionName": "enableEuWest1",
+        "required": true,
+        "type": "text",
+        "variable": "enableEuWest1"
+      },
+      {
+        "index": 7,
+        "max": 10,
+        "min": 1,
+        "questionName": "enableEuWest2",
+        "required": true,
+        "type": "text",
+        "variable": "enableEuWest2"
+      },
+      {
+        "index": 8,
+        "max": 10,
+        "min": 1,
+        "questionName": "debugMe",
+        "required": false,
+        "type": "text",
+        "variable": "debugMe"
+      }
+]

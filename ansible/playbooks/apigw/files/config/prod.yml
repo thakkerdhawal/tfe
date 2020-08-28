@@ -1,0 +1,39 @@
+clusterWideProperties:
+  io.httpMaxConcurrency: 1500
+  io.httpCoreConcurrency: 1000
+  rbsagile.default.destinationRoot: "https://11.161.27.59:444"
+  fxmicropay_uk.destinationRoot: "https://11.160.26.222:443"
+  fxmicropay_us.destinationRoot: "https://11.160.26.223:443"
+  fxmicropay_int_uk.destinationRoot: "https://11.160.26.66:443"
+  fxmicropay_int_us.destinationRoot: "https://11.160.26.67:443"
+
+trustedCertificates:
+  - name: RBS Enterprise Private Issuing CA1
+    properties: "trustAnchor, trustedForSigningServerCerts, revocationCheckingEnabled"
+  - name: RBS Global G1 Issuing CA
+    properties: "trustAnchor, trustedForSigningServerCerts, revocationCheckingEnabled"
+  - name: RBS Global G1 Root CA
+    properties: "trustAnchor, trustedForSigningServerCerts, revocationCheckingEnabled"
+  - name: DigiCert Global CA G2
+    properties: "trustAnchor, trustedForSigningServerCerts, revocationCheckingEnabled"
+  - name: Royal Bank of Scotland Commercial Issuing CA1
+    properties: "trustedForSigningServerCerts, revocationCheckingEnabled"
+  - name: Royal Bank of Scotland Commercial Root CA
+    properties: "trustAnchor, revocationCheckingEnabled"
+
+fxmpListenerPortConfiguration:
+  - portName: "fxmp-uk"
+    portNumber: "9601"
+    serviceName: "FXMP_CORE_UK"
+
+  - portName: "fxmp-us"
+    portNumber: "9602"
+    serviceName: "FXMP_CORE_US"
+
+  - portName: "fxmp-uk-int"
+    portNumber: "9603"
+    serviceName: "FXMP_CORE_INT_UK"
+
+  - portName: "fxmp-us-int"
+    portNumber: "9604"
+    serviceName: "FXMP_CORE_INT_US"

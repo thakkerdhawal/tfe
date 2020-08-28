@@ -1,0 +1,7 @@
+# default
+remoteUser: "ec2-user"   # TODO: change to e0000007 after Tooling intergration
+apigwMgmtEndpoint: "https://localhost:8443"
+apigwUser: "ssgconfig"
+apigwXmlNamespace: "http://ns.l7tech.com/2010/04/gateway-management"
+afPath: "https://artifactory-1.dts.fm.rbsgrp.net/artifactory/eComm-public-releases-local/CA/APIGW/AWS/NWM"
+rootFolderId: "0000000000000000ffffffffffffec76"   # id of gateway root folder

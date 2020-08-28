@@ -1,0 +1,136 @@
+<!doctype html>
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+		<title>Liberator | status</title>
+		<meta name="HandheldFriendly" content="True">
+		<meta name="MobileOptimized" content="320">
+		
+		<link rel="stylesheet" href="../assets/css/liberator.css" />
+
+		<script src="../assets/js/jquery-1.7.2.min.js"></script>
+		<script src="../assets/js/modernizr-2.5.3.min.js"></script>
+		<script src="../assets/js/jquery.royalslider.min.js"></script>
+		<script src="../assets/js/bootstrap.min.js"></script>
+		<script src="../assets/js/custom.js"></script>
+
+                <link rel="shortcut icon" href="../assets/img/favicon.ico">
+                <link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/img/apple-touch-icon-114x114-precomposed.png">
+                <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/img/apple-touch-icon-72x72-precomposed.png">
+                <link rel="apple-touch-icon-precomposed" href="../assets/img/apple-touch-icon-57x57-precomposed.png">
+
+
+	</head>
+
+	<body class="background-marketing">
+	<!--[if lt IE 8]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="http://browsehappy.com/">Upgrade to a different browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to experience this site.</p><![endif]-->
+	<div id="container">
+	  <!--[if IE 7]><div class="fixed-con"><![endif]-->
+	  <!--[if IE 8]><div class="fixed-con"><![endif]-->
+	  <div id="flex-con">
+		<!--Header start-->
+		<br class="clearfloat">
+		<!--Header end-->
+		<div id="content">
+
+<!--[if lt IE 10]> <div class="status-old"> <![endif]-->
+<!--[if gt IE 9]><!-->
+<div align="center">
+<!--<![endif]-->
+
+<h1>Status Page</h1>
+
+<div id="connection-alert" class="alert alert-error">Lost connection, trying to reconnect...</div>
+<div id="licence-alert" class="hidden">Please Wait...</div>
+
+<div id="general-status">
+	<table class="status-table">
+		<tbody>
+			<tr>
+				<th scope="row">Server Version</th>
+				<td id="sljs-Version">Please Wait...</td>
+			</tr>
+			<tr>
+				<th scope="row">StreamLink JS Version</th>
+				<td id="StreamLink-Version">Please Wait...</td>
+			</tr>
+			<tr>
+				<th scope="row">Company</th>
+				<td id="sljs-Company">Please Wait...</td>
+			</tr>
+			<tr>
+				<th scope="row">Max Concurrent Users</th>
+				<td id="sljs-MaxUsers">Please Wait...</td>
+			</tr>
+			<tr>
+				<th scope="row">Max Unique Users</th>
+				<td id="sljs-MaxUniqueUsers">Please Wait...</td>
+			</tr>
+			<tr>
+				<th scope="row">Max Sources</th>
+				<td id="sljs-MaxSources">Please Wait...</td>
+			</tr>
+			<tr>
+				<th scope="row">Expiry Date</th>
+				<td id="sljs-Expire">Please Wait...</td>
+			</tr>
+			<tr>
+				<th scope="row">Grace Period Expiry</th>
+				<td id="sljs-GracePeriodExpireTime">Please Wait...</td>
+			</tr>
+			<tr>
+				<th scope="row">Current Sessions</th>
+				<td id="sljs-GlobalSessions">Please Wait...</td>
+			</tr>
+			<tr>
+				<th scope="row">Peak Sessions</th>
+				<td id="sljs-GlobalMaxSessions">Please Wait...</td>
+			</tr>
+			<tr>
+				<th scope="row">Number of Objects</th>
+				<td id="sljs-GlobalNumObjects">Please Wait...</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
+<div id="dataservice-status">
+	<h4>Data Services</h4>
+</div>
+
+<div id="datasources-status">
+	<h4>DataSources</h4>
+</div>
+
+<div id="clustering-status">
+	<h4>Cluster Information</h4>
+</div>
+
+<div id="licensing-status">
+	<h4>Licensing Information</h4>
+</div>
+
+</div>
+
+<script type="text/javascript" src="../sljs/streamlink.js"></script>
+<script src="liberator-status.js"></script>
+
+</div>
+<!--end content div-->
+
+</div>
+
+</div>
+
+<!--[if IE 8]></div><![endif]-->
+<!--[if IE 7]></div><![endif]-->
+
+</body>
+</html>

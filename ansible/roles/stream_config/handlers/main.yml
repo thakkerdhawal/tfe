@@ -1,0 +1,10 @@
+---
+# handlers file
+- name: Stop stream
+  listen: restart stream
+  command: "sudo systemctl stop stream-agilemarkets.service"
+
+- name: Start stream
+  listen: restart stream
+  command: "sudo systemctl start stream-agilemarkets.service"
+

@@ -1,0 +1,9 @@
+- name: "Update CloudWatch Agent Configuration File"
+  template:
+    src: cwagent_default_cfg.j2
+    dest: "{{ cwagentHome }}/amazon-cloudwatch-agent.json"
+    group: e0000000
+    mode: 0664
+    backup: yes
+  notify: restart cwagent
+  tags: cwagent_update

@@ -1,0 +1,32 @@
+<l7:TrustedCertificate xmlns:l7="http://ns.l7tech.com/2010/04/gateway-management">
+    <l7:Name>{{ trustedCertificateName | mandatory }}</l7:Name>
+    <l7:CertificateData>
+        <l7:Encoded>{{ trustedCertificateData | mandatory }}</l7:Encoded>
+    </l7:CertificateData>
+    <l7:Properties>
+        <l7:Property key="revocationCheckingEnabled">
+            <l7:BooleanValue>{{ revocationCheckingEnabled | default("false") | lower }}</l7:BooleanValue>
+        </l7:Property>
+        <l7:Property key="trustAnchor">
+            <l7:BooleanValue>{{ trustAnchor | default("false") | lower }}</l7:BooleanValue>
+        </l7:Property>
+        <l7:Property key="trustedAsSamlAttestingEntity">
+            <l7:BooleanValue>{{ trustedAsSamlAttestingEntity | default("false") | lower }}</l7:BooleanValue>
+        </l7:Property>
+        <l7:Property key="trustedAsSamlIssuer">
+            <l7:BooleanValue>{{ trustedAsSamlIssuer | default("false") | lower }}</l7:BooleanValue>
+        </l7:Property>
+        <l7:Property key="trustedForSigningClientCerts">
+            <l7:BooleanValue>{{ trustedForSigningClientCerts | default("false") | lower }}</l7:BooleanValue>
+        </l7:Property>
+        <l7:Property key="trustedForSigningServerCerts">
+            <l7:BooleanValue>{{ trustedForSigningServerCerts | default("false") | lower }}</l7:BooleanValue>
+        </l7:Property>
+        <l7:Property key="trustedForSsl">
+            <l7:BooleanValue>{{ trustedForSsl | default("false") | lower }}</l7:BooleanValue>
+        </l7:Property>
+        <l7:Property key="verifyHostname">
+            <l7:BooleanValue>{{ verifyHostname | default("false") | lower }}</l7:BooleanValue>
+        </l7:Property>
+    </l7:Properties>
+</l7:TrustedCertificate>

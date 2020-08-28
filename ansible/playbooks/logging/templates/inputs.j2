@@ -1,0 +1,96 @@
+[aws_sqs_based_s3://S3AccessLogs]
+disabled = 0
+aws_account = ec2-splunkforwarder-role
+interval = 60
+s3_file_decoder = S3AccessLogs
+sourcetype = aws:s3:accesslogs
+sqs_batch_size = 10
+sqs_queue_region = {{ ansible_ec2_placement_region }}
+sqs_queue_url = https://{{ ansible_ec2_placement_region }}.queue.amazonaws.com/{{ ansible_ec2_instance_identity_document_accountid }}/logging-s3access-queue
+index = aws-s3access
+
+[aws_sqs_based_s3://VPCFlowLogs]
+disabled = 0
+aws_account = ec2-splunkforwarder-role
+interval = 60
+s3_file_decoder = CustomLogs
+sourcetype = aws:cloudwatchlogs:vpcflow
+sqs_batch_size = 10
+sqs_queue_region = {{ ansible_ec2_placement_region }}
+sqs_queue_url = https://{{ ansible_ec2_placement_region }}.queue.amazonaws.com/{{ ansible_ec2_instance_identity_document_accountid }}/logging-vpcflow-queue
+index = aws-vpcflow
+
+[aws_sqs_based_s3://WAFLogs]
+disabled = 0
+aws_account = ec2-splunkforwarder-role
+interval = 60
+s3_file_decoder = CustomLogs
+sourcetype = aws:cloudwatchlogs:waf
+sqs_batch_size = 10
+sqs_queue_region = {{ ansible_ec2_placement_region }}
+sqs_queue_url = https://{{ ansible_ec2_placement_region }}.queue.amazonaws.com/{{ ansible_ec2_instance_identity_document_accountid }}/logging-waf-queue
+index = aws-waf
+
+[aws_sqs_based_s3://ELBLogs]
+disabled = 0
+aws_account = ec2-splunkforwarder-role
+interval = 60
+s3_file_decoder = ELBAccessLogs
+sourcetype = aws:elb:accesslogs
+sqs_batch_size = 10
+sqs_queue_region = {{ ansible_ec2_placement_region }}
+sqs_queue_url = https://{{ ansible_ec2_placement_region }}.queue.amazonaws.com/{{ ansible_ec2_instance_identity_document_accountid }}/logging-elblog-queue
+index = aws-elb
+
+[aws_sqs_based_s3://CloudFrontLogs]
+disabled = 0
+aws_account = ec2-splunkforwarder-role
+interval = 60
+s3_file_decoder = CloudFrontAccessLogs
+sourcetype = aws:cloudfront:accesslogs
+sqs_batch_size = 10
+sqs_queue_region = {{ ansible_ec2_placement_region }}
+sqs_queue_url = https://{{ ansible_ec2_placement_region }}.queue.amazonaws.com/{{ ansible_ec2_instance_identity_document_accountid }}/logging-cloudfront-queue
+index = aws-cloudfront
+
+[aws_sqs_based_s3://CloudWatchLogs]
+disabled = 0
+aws_account = ec2-splunkforwarder-role
+interval = 60
+s3_file_decoder = CustomLogs
+sourcetype = aws:cloudwatch
+sqs_batch_size = 10
+sqs_queue_region = {{ ansible_ec2_placement_region }}
+sqs_queue_url = https://{{ ansible_ec2_placement_region }}.queue.amazonaws.com/{{ ansible_ec2_instance_identity_document_accountid }}/logging-cloudwatch-queue
+index = aws-cloudwatch
+
+[aws_sqs_based_s3://AWSConfigLogs]
+disabled = 0
+aws_account = ec2-splunkforwarder-role
+interval = 60
+s3_file_decoder = Config
+sourcetype = aws:config
+sqs_batch_size = 10
+sqs_queue_region = {{ ansible_ec2_placement_region }}
+sqs_queue_url = https://{{ ansible_ec2_placement_region }}.queue.amazonaws.com/{{ ansible_ec2_instance_identity_document_accountid }}/logging-awsconfig-queue
+index = aws-config
+
+[aws_sqs_based_s3://CloudTrailLogs]
+disabled = 0
+aws_account = ec2-splunkforwarder-role
+interval = 60
+s3_file_decoder = Cloudtrail
+sourcetype = aws:cloudtrail
+sqs_batch_size = 10
+sqs_queue_region = {{ ansible_ec2_placement_region }}
+sqs_queue_url = https://{{ ansible_ec2_placement_region }}.queue.amazonaws.com/{{ ansible_ec2_instance_identity_document_accountid }}/logging-cloudtrail-queue
+index = aws-cloudtrail
+
+# Stop indexing log events of un-used functions
+[monitor://$SPLUNK_HOME/var/log/splunk]
+index = _internal
+blacklist = splunk_ta_aws
+
+[monitor://$SPLUNK_HOME/var/log/splunk/splunk_ta_aws_aws_sqs_based_s3_*.log]
+index = _internal
+

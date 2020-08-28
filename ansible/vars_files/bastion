@@ -1,0 +1,3 @@
+update_cwagent_logs: "False"
+###### This is Bastion host Monitoring Metric config ################
+mon_ec2_namespace: bastion

@@ -1,0 +1,7 @@
+---
+# defaults file for generic_afServerFileCopy
+
+theMode: 0755
+theGroup: "{{ theUser }}"
+afFile: "{{ randomString.stdout_lines[0] }}-{{ afUrl | basename }}"
+unarchive: false

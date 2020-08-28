@@ -1,0 +1,104 @@
+# Simple playbook that will allow an EC2 instance to be stopped, started or restarted. Terminations and creates should be handled by Terraform.
+# Tag Names will be used to control what EC2 instance should be stopped and started, this can be further extended as and when required.
+
+- hosts: localhost
+  gather_facts: no
+  vars:
+# default var values
+   ec2Name: false
+   allowedState:
+    - restarted
+    - running
+    - stopped
+  tasks:
+  - name: "Fail when awsRegion is not defined"
+    fail:
+     msg: "Fail when awsRegion is not defined"
+    when: awsRegion is not defined
+
+  - name: "Fail when ec2State is not in allowed list: {{ allowedState }}"
+    fail:
+     msg: "State: {{ ec2State|lower }} is not in allowed list: {{ allowedState }}"
+    when: ec2State not in allowedState
+
+#### Tooling Environment ####
+  - name: Perform operation via Tooling Environment
+## StartofBlock ##
+    block:
+     - name: Gather environment facts
+       setup:
+ 
+     - name: Get EC2 instance facts based on a tag Name and store the output as a var instanceFacts
+       when: ec2Name|lower != 'false'
+       ec2_instance_facts:
+        region: "{{ awsRegion }}"
+        aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        security_token: "{{ lookup('env','AWS_SECURITY_TOKEN') }}"
+        filters:
+         "tag:Name": "{{ ec2Name }}"
+       register: instanceFacts
+
+     - name: Print Private Ip Address of the tagged instances
+       when: instanceFacts is defined
+       debug: msg="{{ item.instances | map(attribute='private_ip_address') | list }}"
+       with_items: 
+       - "{{ instanceFacts }}"
+# Ansible bug with this, commenting out for now
+#       loop_control:
+#        label: "{{ item.instances | map(attribute='private_ip_address') | list  }}"
+
+     - name: "Perform operation set state of EC2 Instances to {{ ec2State }}"
+       local_action:
+        module: ec2 
+        region: "{{ awsRegion }}"
+        state: "{{ ec2State|lower }}"
+        aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        security_token: "{{ lookup('env','AWS_SECURITY_TOKEN') }}"
+        instance_tags:
+         Name: "{{ ec2Name }}"
+       when: ec2Name|lower != 'false'
+
+# block when condition - needs to be at end of tasks #
+    when: tooling|lower == 'true'
+## EndofBlock ##
+  
+#### Non-Tooling Environment ####
+  - name: Perform operation via Jumphost Environment, not tooling
+## StartofBlock ##
+    block:
+     - name: Get EC2 instance facts based on a tag Name and store the output as a var instanceFacts
+       ec2_instance_facts:
+        region: "{{ awsRegion }}"
+        profile: "{{ awsProfile }}"
+        filters:
+         "tag:Name": "{{ ec2Name }}"
+       register: instanceFacts
+       when: ec2Name|lower != 'false'
+
+     - name: Print Private Ip Address of the tagged instances
+       debug: msg="The IP Address of the instance is {{ item.instances | map(attribute='private_ip_address') | list }}"
+       with_items: 
+       - "{{ instanceFacts }}"
+# Ansible bug with this, commenting out for now
+#       loop_control:
+#        label: "{{ item.instances | map(attribute='private_ip_address') | list  }}"
+       when: instanceFacts is defined
+       
+     - name: "Perform operation set state of EC2 Instances to {{ ec2State }}"
+       local_action:
+        module: ec2 
+        region: "{{ awsRegion }}"
+        state: "{{ ec2State|lower }}"
+        profile: "{{ awsProfile }}"
+        instance_tags:
+         Name: "{{ ec2Name }}"
+       when: ec2Name|lower != 'false'
+
+# block when condition - needs to be at end of tasks #
+    when: tooling|lower == 'false'
+## EndofBlock ##
+
+
+

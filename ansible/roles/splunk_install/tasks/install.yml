@@ -1,0 +1,77 @@
+---
+# tasks file for Splunk installation
+- name: "password must be set at runtime"
+  fail:
+    msg: "Please provide adminPassword for first time installation"
+  when: 
+    - adminPassword is not defined or adminPassword == false
+
+- name: "stop splunk"
+  ignore_errors: true
+  command: "sudo systemctl stop splunkd.service"
+
+- name: "upload Splunk binary"
+  include_role:
+    name: generic_afServerFileCopy
+  vars:
+    afUrl: "{{ splunkPackageUrl }}"
+    destFilePath: "{{ destDir }}"
+    unarchive: True
+
+- name: "upload Splunk AWS addon"
+  include_role:
+    name: generic_afServerFileCopy
+  vars:
+    afUrl: "{{ splunkAddonUrl }}"
+    destFilePath: "{{ splunkHome }}/etc/apps"
+    unarchive: True
+  when:
+    - splunkRole == 'splunk_fwd'
+
+- name: "generate user-seed.conf"
+  ini_file:
+    dest: "{{ splunkHome }}/etc/system/local/user-seed.conf"
+    section: user_info
+    option: "{{ item.opt }}"
+    value: "{{ item.val }}"
+  with_items:
+    - { opt: "USERNAME", val: "admin" }
+    - { opt: "PASSWORD", val: "{{ adminPassword }}" }
+  loop_control:
+    label: "{{ item.opt }}"
+  no_log: true
+
+- name: "Set default certificate for Input port"
+  ini_file:
+    dest: "{{ splunkHome }}/etc/system/local/inputs.conf"
+    section: SSL
+    option: "{{ item.opt }}"
+    value: "{{ item.val }}"
+  with_items:
+    - { opt: "serverCert", val: "$SPLUNK_HOME/etc/auth/server.pem" }
+    - { opt: "sslPassword", val: "password" }
+  when:
+    - splunkRole == 'splunk_web'
+
+- name: "Set default certificate for Output Port"
+  ini_file:
+    dest: "{{ splunkHome }}/etc/system/local/outputs.conf"
+    section: "tcpout:default"
+    option: "{{ item.opt }}"
+    value: "{{ item.val }}"
+  with_items:
+    - { opt: "clientCert", val: "$SPLUNK_HOME/etc/auth/server.pem" }
+    - { opt: "sslPassword", val: "password" }
+  when:
+    - splunkRole == 'splunk_fwd'
+
+- name: "Initial Start"
+  command: "{{ splunkExec }} start --accept-license --answer-yes --no-prompt"
+
+- wait_for: timeout=30
+
+- name: "Stop for service install"
+  command: "{{ splunkExec }} stop"
+
+- name: "enable splunk via systemd"
+  command: "sudo systemctl enable splunkd.service"

@@ -1,0 +1,42 @@
+{# Linear Configuration file to configure VLProxy. See link here for further detail https://confluence.dts.fm.rbsgrp.net/display/ECMINFPR/Cleo+VLProxy+Migration#CleoVLProxyMigration-Semi-AutomatedInstallation  #}
+{{ vlproxyDefaultPassword }}
+1
+{{ vlproxyDefaultPassword }}
+{{ vlproxyConfigPassword }}
+{{ vlproxyConfigPassword }}
+2
+{{ vlproxySerialNumbers }}
+3
+8080
+4
+{{ ansible_eth0.ipv4.address }}
+6
+{{ ansible_eth0.ipv4.address }}
+{# If statement so option 7 only gets populated if its not prod. By default, value of vlproxyEnv matches awsEnv as per vars file#}
+{% if vlproxyEnv|lower != 'prod' %}
+7
+5080
+{% endif %}
+9
+9021
+12
+29900-29909
+13
+9022
+16
+150
+17
+150
+18
+50
+24
+1
+25
+No
+26
+Forward
+27
+Yes
+28
+1
+0

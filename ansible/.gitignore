@@ -1,0 +1,10 @@
+#ignore ansible.cfg
+ansible.cfg
+
+#ignore inventory folder and sub-files
+inventory/*
+#Except the group_vars folder
+!inventory/group_vars
+# Except the ec2.ini and ec2.py files for future reference
+!inventory/ec2.ini
+!inventory/ec2.py

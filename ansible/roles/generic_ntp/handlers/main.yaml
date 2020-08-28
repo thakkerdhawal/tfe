@@ -1,0 +1,22 @@
+---
+
+- name: Stop ntpd
+  listen: restart ntpd
+  service:
+    name: ntpd
+    state: stopped
+  become: yes
+
+- name: Manual Sync of time
+  listen: restart ntpd
+  command: ntpdate 169.254.169.123
+  become: yes
+
+- name: Startup ntpd
+  listen: restart ntpd
+  service:
+    name: ntpd
+    state: started
+    enabled: yes
+  become: yes
+

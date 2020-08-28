@@ -1,0 +1,7 @@
+ProxyPreserveHost On
+ProxyPass "/api/atsint/" "https://11.160.30.125:444/api/atsint/"
+ProxyPassReverse "/api/atsint/" "https://11.160.30.125:444/api/atsint/"
+SSLProxyEngine on
+SSLProxyVerify none
+SSLProxyCheckPeerCN off
+SSLProxyCheckPeerName off

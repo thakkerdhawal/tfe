@@ -1,0 +1,12 @@
+---
+### Demon Playbook for master README.md documentation
+
+- hosts: localhost
+  connection: local
+  gather_facts: true
+  environment:
+   CONSUL_HTTP_TOKEN: "{{ consulTokenPassword }}" 
+   no_proxy: artifactory-1.dts.fm.rbsgrp.net,ecomm.fm.rbsgrp.net
+#   https_proxy: "http://lonbp00011.fm.rbsgrp.net:8080"
+  roles:
+   - ../../roles/generic_runTerraform

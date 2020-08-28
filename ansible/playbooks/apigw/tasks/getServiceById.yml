@@ -1,0 +1,25 @@
+#
+# Get service from by service ID
+#
+# Input vars:
+# - apigwMgmtEndpoint
+# - apigwUser
+# - apigwPassword
+# - serviceId
+# Output vars:
+# - apigw_response_get_service_by_id
+#
+- name: "lookup target service by ID"
+  uri:
+    url: '{{ apigwMgmtEndpoint }}/restman/1.0/services/{{ serviceId }}'
+    method: GET
+    force_basic_auth: yes
+    user: "{{ apigwUser }}"
+    password: "{{ apigwPassword }}"
+    headers:
+      Content-Type: 'application/xml'
+    validate_certs: no
+    status_code: 200,404
+    return_content: yes
+  register: apigw_response_get_service_by_id
+

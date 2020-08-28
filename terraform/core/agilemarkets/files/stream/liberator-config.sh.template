@@ -1,0 +1,29 @@
+#!/bin/bash
+
+STREAM_BASE=${TERRA_TARGET_TMPL}
+
+sed -i "s/JAVA_VERSION_TMPL/${TERRA_JAVA_VERSION}/g" $STREAM_BASE/etc/java.conf
+sed -i "s/ENV_TMPL/${TERRA_ENV_TMPL}/g" $STREAM_BASE/crontab.conf # uat
+sed -i "s/INSTANCE_TMPL/${TERRA_INSTANCE_TMPL}/g" $STREAM_BASE/crontab.conf # uat
+sed -i "s/ENV_TMPL/${TERRA_ENV_TMPL}/g" $STREAM_BASE/etc/logmanagement.conf # uat
+sed -i "s/INSTANCE_TMPL/${TERRA_INSTANCE_TMPL}/g" $STREAM_BASE/etc/logmanagement.conf # uat
+sed -i "s/ENV_NAME_TMPL/${TERRA_ENV_NAME_TMPL}/g" $STREAM_BASE/etc/topicenabler.conf 
+sed -i "s/PASS_TMPL/${TERRA_PASS_TMPL}/g" $STREAM_BASE/etc/topicenabler.conf # generated password
+sed -i "s#ENV_TOPICENABLER_URL#${TERRA_TOPICENABLER_URL_TMPL}#g" $STREAM_BASE/etc/topicenabler.conf 
+sed -i "s/PASS_TMPL/${TERRA_PASS_TMPL}/g" $STREAM_BASE/etc/rttpd-infra.conf # generated password
+sed -i "s/HTTPS_PORT_TMPL/${TERRA_HTTPS_PORT_TMPL}/g" $STREAM_BASE/etc/rttpd-infra.conf 
+sed -i "s/DATASRC_PORT_TMPL/${TERRA_DATASRC_PORT_TMPL}/g" $STREAM_BASE/etc/rttpd-infra.conf 
+sed -i "s/DIRECT_PORT_TMPL/${TERRA_DIRECT_PORT_TMPL}/g" $STREAM_BASE/etc/rttpd-infra.conf 
+sed -i "s#HTTP_ACS_CTRL_HDR_TMPL#${TERRA_HTTP_ACS_CTRL_HDR_TMPL}#g" $STREAM_BASE/etc/rttpd-infra.conf # Refer URLs 
+sed -i "s/ENV_TMPL/${TERRA_ENV_TMPL}/g" $STREAM_BASE/etc/rttpd-infra.conf # uat
+sed -i "s/INSTANCE_TMPL/${TERRA_INSTANCE_TMPL}/g" $STREAM_BASE/etc/rttpd-infra.conf # uat
+sed -i "s/PASS_TMPL/${TERRA_PASS_TMPL}/g" $STREAM_BASE/htdocs/status/liberator-status.js # generated password
+sed -i "s/ENV_TMPL/${TERRA_ENV_TMPL}/g" $STREAM_BASE/liberator.service_systemd
+sed -i "s/INSTANCE_TMPL/${TERRA_INSTANCE_TMPL}/g" $STREAM_BASE/liberator.service_systemd
+sed -i "s#BASE_DIR_TMPL#$STREAM_BASE#g" $STREAM_BASE/liberator.service_systemd
+
+sudo cp $STREAM_BASE/liberator.service_systemd /etc/systemd/system/liberator_ldn-${TERRA_INSTANCE_TMPL}-${TERRA_ENV_TMPL}.service
+sudo systemctl daemon-reload
+sudo systemctl start liberator_ldn-${TERRA_INSTANCE_TMPL}-${TERRA_ENV_TMPL}
+sudo systemctl enable liberator_ldn-${TERRA_INSTANCE_TMPL}-${TERRA_ENV_TMPL}
+

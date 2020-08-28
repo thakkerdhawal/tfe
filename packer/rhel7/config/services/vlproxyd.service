@@ -1,0 +1,12 @@
+[Unit]
+Description=VLPROXY
+After=syslog.target network.target
+[Service]
+ExecStart=/opt/app/ecomm/VLProxy/VLProxyd start
+ExecStop=/opt/app/ecomm/VLProxy/VLProxyd stop
+RemainAfterExit=yes
+User=e0000047
+Group=e0000000
+ 
+[Install]
+WantedBy=multi-user.target

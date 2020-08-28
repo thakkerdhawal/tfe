@@ -1,0 +1,5 @@
+<IfModule proxy_module>
+  ProxyPreserveHost On
+  ProxyPass /api/spreadsheet/ http://11.161.27.86:25540/
+  ProxyPassReverse /api/spreadsheet/ http://11.161.27.86:25540/
+</IfModule>

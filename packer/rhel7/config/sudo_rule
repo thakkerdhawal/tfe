@@ -1,0 +1,29 @@
+
+## DES Tooling Runtime Accounts Rules
+e0000010        ALL=(ALL) NOPASSWD:       ALL
+e0000005        ALL=(root) NOPASSWD:      /usr/bin/systemctl start httpd-agilemarkets.service, /usr/bin/systemctl stop httpd-agilemarkets.service,\
+                                          /usr/bin/systemctl restart httpd-agilemarkets.service, /usr/bin/systemctl enable httpd-agilemarkets.service, /usr/bin/systemctl disable httpd-agilemarkets.service,\
+                                          /usr/bin/systemctl start stream-agilemarkets.service, /usr/bin/systemctl stop stream-agilemarkets.service,\
+                                          /usr/bin/systemctl restart stream-agilemarkets.service, /usr/bin/systemctl enable stream-agilemarkets.service, /usr/bin/systemctl disable stream-agilemarkets.service
+e0000006        ALL=(root) NOPASSWD:      /usr/bin/systemctl start httpd-bondsyndicate.service, /usr/bin/systemctl stop httpd-bondsyndicate.service,\
+                                          /usr/bin/systemctl restart httpd-bondsyndicate.service, /usr/bin/systemctl enable httpd-bondsyndicate.service, /usr/bin/systemctl disable httpd-bondsyndicate.service
+e0000011        ALL=(root) NOPASSWD:      /usr/bin/systemctl start splunkd.service, /usr/bin/systemctl stop splunkd.service,\
+                                          /usr/bin/systemctl restart splunkd.service, /usr/bin/systemctl enable splunkd.service, /usr/bin/systemctl disable splunkd.service
+e0000047        ALL=(root) NOPASSWD:      /usr/bin/systemctl start vlproxyd.service, /usr/bin/systemctl stop vlproxyd.service,\
+                                          /usr/bin/systemctl restart vlproxyd.service, /usr/bin/systemctl enable vlproxyd.service, /usr/bin/systemctl disable vlproxyd.service
+
+User_Alias      DES_USERS=%e0000000
+Cmnd_Alias      DES_READ=/bin/cat /opt/app/ecomm/*, !/bin/cat /opt/app/ecomm/*..*, !/bin/cat /opt/app/ecomm/*\ *,\
+                         /bin/cat /var/log/*, !/bin/cat /var/log/*..*, !/bin/cat /var/log/*\ *,\
+                         /bin/cat /etc/*, !/bin/cat /etc/*..*, !/bin/cat /etc/*\ *,\
+                         /bin/cat /proc/*, !/bin/cat /proc/*..*, !/bin/cat /proc/*\ *
+Cmnd_Alias      DES_USRBIN=/usr/bin/crontab -l, /usr/bin/df, /usr/bin/du, /bin/ls, /usr/bin/netstat, /usr/bin/pstree,\
+                           /usr/bin/pwdx, /usr/bin/chronyc sourcestats, /usr/bin/chronyc tracking, /usr/bin/chronyc sources
+Cmnd_Alias      DES_SBIN=/sbin/ethtool eth[0-9], /sbin/ethtool eth[0-9][0-9], /sbin/fdisk -l, /sbin/swapon -s, /sbin/aide --check
+Cmnd_Alias      DES_USRSBIN=/usr/sbin/df, /usr/sbin/dmidecode, /usr/sbin/dmesg, /usr/sbin/ifconfig -a, /usr/sbin/lsattr, /usr/sbin/lsof,\
+                            /usr/sbin/lvdisplay, /usr/sbin/vgdisplay, /usr/sbin/fuser -[!k]*, /usr/sbin/mtr, /usr/sbin/restorecon 
+Cmnd_Alias      DES_SERVICE=/usr/bin/systemctl start amazon-cloudwatch-agent.service, /usr/bin/systemctl stop amazon-cloudwatch-agent.service,\
+                            /usr/bin/systemctl restart amazon-cloudwatch-agent.service, /usr/bin/systemctl enable amazon-cloudwatch-agent.service, /usr/bin/systemctl daemon-reload
+
+DES_USERS       ALL=(root) NOPASSWD: DES_READ, DES_USRBIN, DES_SBIN, DES_USRSBIN, DES_SERVICE
+

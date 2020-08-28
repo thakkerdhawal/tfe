@@ -1,0 +1,29 @@
+[
+      {
+        "index": 0,
+        "max": 30,
+        "min": 1,
+        "questionName": "theHost",
+        "required": false,
+        "type": "text",
+        "variable": "theHost"
+      },
+      {
+        "index": 1,
+        "max": 30,
+        "min": 1,
+        "questionName": "thePort",
+        "required": false,
+        "type": "text",
+        "variable": "thePort"
+      },
+      {
+        "index": 2,
+        "max": 100,
+        "min": 1,
+        "questionName": "theUrl",
+        "required": false,
+        "type": "text",
+        "variable": "theUrl"
+      }
+]

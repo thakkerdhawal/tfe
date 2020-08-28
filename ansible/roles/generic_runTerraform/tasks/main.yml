@@ -1,0 +1,204 @@
+---
+# tasks file for generic_runTerraform
+
+######## Debug Tasks - Keep for now ########
+
+ - name: Show all Env Vars
+   debug: msg="{{ ansible_env }}"
+   when: debugMe|lower == 'true'
+
+ - name: Show value of toolingTfCodeDir
+   debug: var=toolingTfCodeDir
+   when: debugMe|lower == 'true'
+
+ - name: Show hostvars
+   debug: var=hostvars[inventory_hostname]
+   when: debugMe|lower == 'true'
+
+## Check TF Binary present in expected location ##
+
+ - name: Check Terraform binary installed in expected way
+   stat: path="{{ tfBinary }}"
+   register: tfBin
+   failed_when: tfBin.stat.islnk is not defined
+
+######## Logic for Tooling Environment Only ########
+
+ - name: Perform Prep Work for Tooling Environment
+## StartofBlock ##
+   block:
+# TF Path and Plugin Dir on Tooling will be different to that of the Ansible Core env
+    - name: Set value of tfCodeDir to tfToolingCodeDir
+      set_fact: tfCodeDir="{{ toolingTfCodeDir }}"
+    - name: Set value of tfPluginsDir
+      set_fact: tfPluginsDir="{{ playbook_dir }}/tfPlugins"
+# Obtain TF Providers from AF #
+    - name: Get "{{ afFile }}" info from AF
+      run_once: true
+      uri:
+       method: HEAD
+       url: "{{ afUrl }}"
+       return_content: false
+       validate_certs: no
+      register: response
+
+    - name: Print sha1sum of AF file if debug var enabled
+      run_once: true
+      delegate_to: localhost
+      debug: msg="SHA1 checksum is {{ response.x_checksum_sha1 }}"
+      when: debugMe|lower == 'true'
+
+    - name: download tf providers file from Artifactory
+      run_once: true
+      get_url:
+       url: "{{ afUrl }}"
+       dest: "{{ playbook_dir }}/tfPlugins.tar.gz"
+       checksum: "sha1:{{ response.x_checksum_sha1 }}"
+       validate_certs: no
+
+#Create temp tfPlugins directory for tfProviders #
+    - name: "Create tfPlugins directory for tfProviders in {{ playbook_dir }}"
+      file: state=directory path="{{ playbook_dir }}/tfPlugins"    
+
+    - name: Extract TF providers into "{{ playbook_dir }}/tfPlugins/" directory
+      unarchive: src="{{ playbook_dir }}/tfPlugins.tar.gz" dest="{{ playbook_dir }}/tfPlugins"
+
+# Handle AWS Auth Using Profiles in a temporary file #
+    - name: Create local template file for aws credentials so that an AWS profile can be used
+      template: src="awsCreds.j2" dest="{{ awsCredFile }}" mode=0644
+      when: manualAuth|lower != 'true'
+# block when condition - needs to be at end of tasks #
+   when: tooling|lower == 'true'
+## EndofBlock ##
+
+######## Logic for Ansible Core Environment Only ########
+
+ - name: Perform Prep Work for Ansible Core Environment
+## StartofBlock ##
+   block:
+    - name: Check TF Providers already present
+      stat: path=/usr/local/bin/.terraform/plugins/linux_amd64
+      register: tfProvDir
+      failed_when: tfProvDir.stat.isdir is not defined
+
+# TF Path and TF Plugin Dir on Dev env will be different to that of Tooling env
+    - name: Set value of tfCodeDir to devTfCodeDir
+      set_fact: tfCodeDir="{{ devTfCodeDir }}"   
+    - name: Set value of tfPluginsDir
+      set_fact: tfPluginsDir="{{ devTfPluginsDir }}"
+# Set awsCredFile to ~/.aws/credentials
+    - name: "Set value of awsCredFile to {{ lookup('env', 'HOME') }}/.aws/credentials"
+      set_fact: awsCredFile="{{ lookup('env', 'HOME') }}/.aws/credentials"   
+# block when condition - needs to be at end of tasks #
+   when: tooling|lower == 'false'
+## EndofBlock ##
+  
+######## Common TF Steps ########
+
+# Tf Init #
+
+ - name: Perform TF Init - Always perform this
+   shell: "cd {{ tfCodeDir }}; {{ tfBinary }} init -backend-config=\"path=application/nwm/{{ awsEnv|lower }}/terraform/{{ awsAccount|lower }}/state/tfstate\" -plugin-dir=\"{{ tfPluginsDir }}\" -no-color"  
+   register: tfInit
+
+ - name: Capture list of TF Workspaces
+   shell: "cd {{ tfCodeDir }}; {{ tfBinary }} workspace list -no-color"
+   register: wsList
+
+ - name: "Print Workspace List"
+   debug: msg="{{ wsList.stdout_lines }}"
+   when: wsList is defined
+
+# Use output of wsList to identify if workspace exists to determine whether to select or create workspace
+ - name: Select TF Workspace
+   shell: "cd {{ tfCodeDir }}; {{ tfBinary }} workspace select {{ wsName }} -no-color"
+   register: wsSelect
+   when: item in wsList.stdout
+   with_items: 
+    - "{{ wsName }}"
+
+ - name: Create TF Workspace
+   shell: "cd {{ tfCodeDir }}; {{ tfBinary }} workspace new {{ awsEnv|lower }}_{{ awsAccount|lower }}_{{ awsComponent|lower }}_{{ awsRegion|lower }} -no-color"
+   register: wsNew
+   when: item not in wsList.stdout
+   with_items: 
+    - "{{ wsName }}"
+
+ - name: Capture current workspace
+   shell: "cd {{ tfCodeDir }}; {{ tfBinary }} workspace show -no-color"
+   register: wsShow
+
+ - name: Print TF Current Workspace
+   debug: msg="{{ wsShow.stdout }}"
+   when: wsShow is defined
+
+# Tooling output not interactive so state cannot be reviewed in-flight prior to an apply or destroy
+# Tf Plan #
+ 
+ - name: Perform TF Plan 
+   shell: "cd {{ tfCodeDir }}; {{ tfBinary }} plan -var \"aws_profile={{ awsProfile }}\" -var \"credential_file={{ awsCredFile }}\" -out {{ playbook_dir }}/tf-build.{{ wsName }}.tfplan -no-color | tee {{ playbook_dir }}/{{ wsName }}.txt"
+   register: tfCheck
+   when: tfPlan|lower == 'true'
+   environment:
+    AWS_ACCESS_KEY_ID: ''
+    AWS_SECRET_ACCESS_KEY: ''
+    AWS_SECURITY_TOKEN: ''
+
+ - name: Capture TF Plan Output via Terraform show
+   shell: "cd {{ tfCodeDir }}; {{ tfBinary }} show {{ playbook_dir }}/tf-build.{{ wsName }}.tfplan  -no-color | tee {{ playbook_dir }}/{{ wsName }}.txt"
+   register: tfPlanOutput
+   when: tfCheck is defined
+    
+# From testing, this has provided the best output. Our Consul items cause issues though
+ - name: Print TF Plan from captured plain text file (it will be empty if plan never occurred)
+   debug: var=item
+   with_file:
+    - "{{ playbook_dir }}/{{ wsName }}.txt"
+   when: tfPlanOutput is defined
+
+# Email the output plan file and text file to the sender if mailTo variable defined #
+
+ - name: Email plan info to implementer if mailMe set to true
+   mail:
+    host: ecomm-smtp-vip.fm.rbsgrp.net
+    port: 25
+    from: AnsibleTowerTooling
+    to: "{{ mailTo }}"
+    subject: Ansible TF Plan Output
+    attach: 
+     - "{{ playbook_dir }}/{{ wsName }}.txt"
+     - "{{ playbook_dir }}/tf-build.{{ wsName }}.tfplan"  
+   when:
+    - tfPlanOutput is defined
+    - mailMe|lower == 'true'
+
+# TF Apply or Delete #
+  
+ - name: "Perform TF {{ tfAction }}"
+   shell: "cd {{ tfCodeDir }}; {{ tfBinary }} {{ tfAction }} -var \"aws_profile={{ awsProfile }}\" -var \"credential_file={{ awsCredFile }}\" -auto-approve  -no-color"
+   when: tfAction|lower == 'apply' or tfAction|lower == 'destroy'
+   register: tfChange
+   environment:
+    AWS_ACCESS_KEY_ID: ''
+    AWS_SECRET_ACCESS_KEY: ''
+    AWS_SECURITY_TOKEN: ''
+
+ - name: "Print TF {{ tfAction }} Output"
+   debug: msg="{{ tfChange.stdout_lines }}"
+   when: tfAction|lower == 'apply' or tfAction|lower == 'destroy'
+
+# TF Cmd i.e. state list - must accept aws_profile and credential_file parameter#
+#
+ - name: Perform Ad Hoc TF Command
+   shell: "cd {{ tfCodeDir }}; {{ tfBinary }} {{ tfCmd }} -var \"aws_profile={{ awsProfile }}\" -var \"credential_file={{ awsCredFile }}\"  -no-color"
+   when: tfCmd|lower != 'false'
+   register: tfAdhoc
+   environment:
+    AWS_ACCESS_KEY_ID: ''
+    AWS_SECRET_ACCESS_KEY: ''
+    AWS_SECURITY_TOKEN: ''
+
+ - name: Print TF Ad-Hoc Output
+   debug: msg="{{ tfAdhoc.stdout_lines }}"
+   when: tfCmd|lower != 'false'
+

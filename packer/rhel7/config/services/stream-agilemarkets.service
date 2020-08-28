@@ -1,0 +1,16 @@
+[Unit]
+Description=Caplin Liberator Service - stream-agilemarkets
+After=network.target
+
+[Service]
+Type=forking
+User=e0000005
+Group=e0000000
+WorkingDirectory=/ecomm/caplin/liberator/stream-agilemarkets/current/etc
+ExecStart=/ecomm/caplin/liberator/stream-agilemarkets/current/etc/rttpd start
+ExecStop=/ecomm/caplin/liberator/stream-agilemarkets/current/etc/rttpd stop
+Restart=on-failure
+PIDFile=/ecomm/caplin/liberator/stream-agilemarkets/current/var/rttpd.pid
+
+[Install]
+WantedBy=multi-user.target

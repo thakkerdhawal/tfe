@@ -1,0 +1,5 @@
+<IfModule proxy_module>
+      ProxyPreserveHost On
+      ProxyPass / https://11.160.26.216:28942/
+      ProxyPassReverse / https://11.160.26.216:28942/
+</IfModule>

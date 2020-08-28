@@ -1,0 +1,3 @@
+# handlers file
+- name: restart cwagent
+  command: sudo systemctl restart amazon-cloudwatch-agent.service

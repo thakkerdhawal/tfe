@@ -1,0 +1,30 @@
+#
+# Create Private Key
+#
+# Input vars:
+# - apigwMgmtEndpoint
+# - apigwUser
+# - apigwPassword
+# - keyAlias
+# - keyPayload
+# 
+# Output vars:
+# - apigw_response_create_privatekey
+#
+
+- name: "create private key"
+  uri:
+    url: "{{ apigwMgmtEndpoint }}/restman/1.0/privateKeys/00000000000000000000000000000002:{{ keyAlias | urlencode }}"
+    method: POST
+    force_basic_auth: yes
+    user: "{{ apigwUser }}"
+    password: "{{ apigwPassword }}"
+    headers:
+      Content-Type: 'application/xml'
+    body: "{{ keyPayload }}"
+    validate_certs: no
+    status_code: 200,201
+    return_content: no
+  register: apigw_response_create_privatekey
+  changed_when: apigw_response_create_privatekey is succeeded
+

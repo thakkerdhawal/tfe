@@ -1,0 +1,16 @@
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files: 
+  - ../../vars_files/healthcheck
+  tasks: 
+  - name: include the generic_healthCheck role to test an external NLB
+    include_role:
+      name: ../../roles/generic_healthCheck
+    vars:
+      thePort: "{{ item.thePort | default(false, true) }}"
+      theHost: "{{ item.theHost | default(false, true) }}"
+      theUrl: "{{ item.theUrl | default(false, true) }}"
+      theString: "{{ item.theString | default('donotcheck', true) }}"
+      theTimeout: 5
+    loop: "{{ lookup('vars', awsEnv) }}"

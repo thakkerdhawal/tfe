@@ -1,0 +1,14 @@
+# Systemd unit file for CLEO VLPROXY
+#
+[Unit]
+Description=VLPROXY
+After=syslog.target network.target
+[Service]
+ExecStart={{ vlproxyHome }}/VLProxyd start
+ExecStop={{ vlproxyHome }}/VLProxyd stop
+RemainAfterExit=yes
+User={{ theUser }}
+Group={{ theUser }}
+ 
+[Install]
+WantedBy=multi-user.target

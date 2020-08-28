@@ -1,0 +1,207 @@
+## Playbook that will interact with AWS Route 53 that will:
+# - Read current information about the provided Alias DNS record(s)
+# - Print the current weight, identifier, target value and record of provided record in eu-west-1 and eu-west-2
+
+- hosts: localhost
+  gather_facts: false
+  connection: local
+# default vars for the playbook
+  vars:
+   r53Type: A
+   disableEuWest1: False #to prevent any action being taken by default
+   disableEuWest2: False #to prevent any action being taken by default
+   enableEuWest1: False #to prevent any action being taken by default
+   enableEuWest2: False #to prevent any action being taken by default
+   debugMe: False
+  environment:
+   CONSUL_HTTP_TOKEN: "{{ consulTokenPassword }}"
+#   http_proxy: "http://lonbp00011.fm.rbsgrp.net:8080"  #this is temp for tooling
+#   https_proxy: "http://lonbp00011.fm.rbsgrp.net:8080" #this is temp for tooling
+  tasks:
+  - name: "Fail when any of awsProfile, awsEnv, r53Record or r53Zone are not defined"
+    fail:
+     msg: "Fail when any of awsProfile, awsEnv, r53Record or r53Zone are not defined"
+    when: awsProfile is not defined or awsEnv is not defined or r53Record is not defined or r53Zone is not defined
+
+  - name: Show all Env Vars
+    debug: msg="{{ ansible_env }}"
+    when: debugMe|lower == 'true'
+
+  - name: Get R53 info
+    route53:
+     profile: "{{ awsProfile }}"
+     state: get
+     zone: "{{ r53Zone }}"
+     record: "{{ r53Record }}.{{ r53Zone }}"
+     type: "{{ r53Type }}"
+     identifier: "{{ item.identifier }}"
+    register: r53Info
+    with_items:
+     - { identifier: "{{ awsEnv }}-eu-west-1" }   
+     - { identifier: "{{ awsEnv }}-eu-west-2" }   
+    tags:
+     - get
+
+  - debug: msg="{{ r53Info.results }}"
+    when: debugMe
+    tags:
+     - get
+
+  - name: "Print Current R53 info on R53 Record {{ r53Record }}.{{ r53Zone }} - this will fail if dns entries for both regions not present"
+    debug: 
+     msg: 
+      - "Record is: {{ item.set.record }}"
+      - "Weighted Record Unique Identifier is: {{ item.set.identifier }}"
+      - "Current Health Check ID is: {{ item.set.health_check }}"
+      - "The target for this Record is: {{ item.set.value }}"
+      - "Current Routing Weight is: {{ item.set.weight }}"
+    with_items: 
+     - "{{ r53Info.results }}"
+    loop_control:
+     label: 
+      - "{{ item.set.record }}"
+      - "{{ item.set.identifier }}"
+      - "{{ item.set.health_check }}"
+      - "{{ item.set.weight }}"
+    tags:
+     - get
+
+  - name: "change weight to 0 for R53 Record {{ r53Record }}.{{ r53Zone }} in {{ awsEnv }}-eu-west-1"
+    route53: 
+     profile: "{{ awsProfile }}"
+     state: present
+     zone: "{{ r53Zone }}"
+     record: "{{ r53Record }}.{{ r53Zone }}"
+     identifier: "{{ awsEnv }}-eu-west-1"
+     type: "{{ r53Type }}"
+     alias: "{{ r53Info.results.0.set.alias }}"
+     alias_hosted_zone_id: "{{ r53Info.results.0.set.alias_hosted_zone_id }}"
+     alias_evaluate_target_health: "{{ r53Info.results.0.set.alias_evaluate_target_health }}"
+     value: "{{ r53Info.results.0.set.value }}"
+     health_check: "{{ r53Info.results.0.set.health_check }}"
+     weight: 0
+     overwrite: True
+    register: modEuWest1
+    when: 
+     - disableEuWest1
+     - not disableEuWest2
+     - not enableEuWest1
+     - not enableEuWest2
+     - r53Info.results.1.set.weight != '0' #do not do this if its set to 0 already in eu-west-2
+    tags: 
+     - disable
+     - change
+
+  - name: "change weight to 0 for R53 Record {{ r53Record }}.{{ r53Zone }} in {{ awsEnv }}-eu-west-2"
+    route53: 
+     profile: "{{ awsProfile }}"
+     state: present
+     zone: "{{ r53Zone }}"
+     record: "{{ r53Record }}.{{ r53Zone }}"
+     identifier: "{{ awsEnv }}-eu-west-2"
+     type: "{{ r53Type }}"
+     alias: "{{ r53Info.results.1.set.alias }}"
+     alias_hosted_zone_id: "{{ r53Info.results.1.set.alias_hosted_zone_id }}"
+     alias_evaluate_target_health: "{{ r53Info.results.1.set.alias_evaluate_target_health }}"
+     value: "{{ r53Info.results.1.set.value }}"
+     health_check: "{{ r53Info.results.1.set.health_check }}"
+     weight: 0
+     overwrite: True
+    register: modEuWest2
+    when: 
+     - not disableEuWest1
+     - disableEuWest2
+     - not enableEuWest1
+     - not enableEuWest2   
+     - r53Info.results.0.set.weight != '0' #do not do this if its set to 0 already in eu-west-1
+    tags: 
+     - disable
+     - change
+
+  - name: "Reset weight for record {{ r53Record }}.{{ r53Zone }} in {{ awsEnv }}-eu-west-1 to value of weighted record in eu-west-2"
+    route53: 
+     alias: "{{ r53Info.results.0.set.alias }}"
+     alias_hosted_zone_id: "{{ r53Info.results.0.set.alias_hosted_zone_id }}"
+     alias_evaluate_target_health: "{{ r53Info.results.1.set.alias_evaluate_target_health }}"
+     profile: "{{ awsProfile }}"
+     state: present
+     zone: "{{ r53Zone }}"
+     record: "{{ r53Record }}.{{ r53Zone }}"
+     identifier: "{{ awsEnv }}-eu-west-1"
+     type: "{{ r53Type }}"
+     value: "{{ r53Info.results.0.set.value }}"
+     health_check: "{{ r53Info.results.0.set.health_check }}"
+     weight: "{{ r53Info.results.1.set.weight }}" #intentionally value from other region
+     overwrite: True
+    when: 
+     - enableEuWest1
+     - not enableEuWest2
+     - not disableEuWest1
+     - not disableEuWest2
+     - r53Info.results.1.set.weight != '0' #do not do this if its set to 0 in eu-west-2
+    tags: 
+     - disable
+     - change 
+
+  - name: "Reset weight for record {{ r53Record }}.{{ r53Zone }} in {{ awsEnv }}-eu-west-2 to value of weighted record in eu-west-1"
+    route53: 
+     alias: "{{ r53Info.results.1.set.alias }}"
+     alias_hosted_zone_id: "{{ r53Info.results.1.set.alias_hosted_zone_id }}"
+     alias_evaluate_target_health: true
+     profile: "{{ awsProfile }}"
+     state: present
+     zone: "{{ r53Zone }}"
+     record: "{{ r53Record }}.{{ r53Zone }}"
+     identifier: "{{ awsEnv }}-eu-west-2"
+     type: "{{ r53Type }}"
+     value: "{{ r53Info.results.1.set.value }}"
+     health_check: "{{ r53Info.results.1.set.health_check }}"
+     weight: "{{ r53Info.results.0.set.weight }}" #intentionally value from other region
+     overwrite: True
+    when: 
+     - enableEuWest2
+     - not enableEuWest1
+     - not disableEuWest1
+     - not disableEuWest2
+     - r53Info.results.0.set.weight != '0' #do not do this if its set to 0 in eu-west-1
+    tags: 
+     - disable
+     - change
+   
+  - name: Get R53 info
+    route53:
+     profile: "{{ awsProfile }}"
+     state: get
+     zone: "{{ r53Zone }}"
+     record: "{{ r53Record }}.{{ r53Zone }}"
+     type: "{{ r53Type }}"
+     identifier: "{{ item.identifier }}"
+    register: r53Info
+    with_items:
+     - { identifier: "{{ awsEnv }}-eu-west-1" }   
+     - { identifier: "{{ awsEnv }}-eu-west-2" }   
+    tags:
+     - get
+     - change
+     - disable
+
+  - name: "Print Current R53 info on R53 Record {{ r53Record }}.{{ r53Zone }}"
+    debug: 
+     msg: 
+      - "Record is: {{ item.set.record }}"
+      - "Weighted Record Unique Identifier is: {{ item.set.identifier }}"
+      - "Current Health Check ID is: {{ item.set.health_check }}"
+      - "The target for this Record is: {{ item.set.value }}"
+      - "Current Routing Weight is: {{ item.set.weight }}"
+    with_items: 
+     - "{{ r53Info.results }}"
+    loop_control:
+     label: 
+      - "{{ item.set.record }}"
+      - "{{ item.set.identifier }}"
+      - "{{ item.set.health_check }}"
+      - "{{ item.set.weight }}"
+    tags:
+     - get
+     - change
+     - disable

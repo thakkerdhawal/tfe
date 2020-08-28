@@ -1,0 +1,28 @@
+#
+# Update Cluster Wide Property by ID (create new if doesn't exist)
+#
+# Input vars:
+# - apigwMgmtEndpoint
+# - apigwUser
+# - apigwPassword
+# - clusterPropertyId
+# - clusterPropertyPayload
+# Output vars:
+# - apigw_response_update_clusterproperty
+#
+- name: "create or update Cluster Wide Property by ID"
+  uri:
+    url: '{{ apigwMgmtEndpoint }}/restman/1.0/clusterProperties/{{ clusterPropertyId }}'
+    method: PUT
+    force_basic_auth: yes
+    user: "{{ apigwUser }}"
+    password: "{{ apigwPassword }}"
+    headers:
+      Content-Type: 'application/xml'
+    validate_certs: no
+    body: "{{ clusterPropertyPayload }}"
+    status_code: 200,201
+    return_content: yes
+  register: apigw_response_update_clusterproperty
+  changed_when: apigw_response_update_clusterproperty is succeeded
+

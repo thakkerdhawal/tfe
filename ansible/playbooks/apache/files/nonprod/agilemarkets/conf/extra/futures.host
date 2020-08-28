@@ -1,0 +1,6 @@
+<IfModule proxy_module>
+  ProxyPreserveHost On
+  ProxyPass /api/futures/v1/reports/download/ https://11.160.29.254:27360/api/futures/v1/reports/download/
+  ProxyPassReverse /api/futures/v1/reports/download/ https://11.160.29.254:27360/api/futures/v1/reports/download/
+</IfModule>
+

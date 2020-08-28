@@ -1,0 +1,8 @@
+---
+# defaults file for deploy_apache
+packageLocation: "{{ destFilePath }}" 
+apacheUser: ec2-user
+apacheGroup: ec2-user
+apacheUpdateFlag: False 
+#Derived /optional vars
+destDir: "/ecomm/Web/httpd-{{ apacheInstanceName }}"

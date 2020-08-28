@@ -1,0 +1,8 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  environment:
+   no_proxy: ecomm.fm.rbsgrp.net
+  roles:
+    - { role: '../roles/awsProxyJump' }

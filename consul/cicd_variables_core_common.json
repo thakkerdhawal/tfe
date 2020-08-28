@@ -1,0 +1,172 @@
+[
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/",
+                "value": ""
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/agilemarkets_dns_external",
+                "value": "www.cicd.cloud.agilemarkets.com"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/apigw_backends",
+                "value": "11.160.29.86/32:444,11.160.30.72/32:443,11.160.30.95/32:443,11.160.30.6/32:444"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/apigw_instance_count",
+                "value": "2"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/apigw_instance_type",
+                "value": "m4.large"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/apigw_rbsagile_bundle",
+                "value": "002-nwm-v1.3-20190319122130.req.bundle.gz"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/apigw_build_package",
+                "value": "ca_apigw_base_build_repo_v20190115.zip"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/apigw_cwp",
+                "value": "[{\"name\":\"io.httpMaxConcurrency\",\"value\":\"1500\"},{\"name\":\"io.httpCoreConcurrency\",\"value\":\"1000\"},{\"name\":\"rbsagile.default.destinationRoot\",\"value\":\"https://11.160.29.86:444\"},{\"name\":\"des.monitoring.destinationRoot\",\"value\":\"https://11.160.30.72:443\"},{\"name\":\"fxmicropay.default.destinationRoot\",\"value\":\"https://11.160.30.95:443\"}]"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/bondsyndicate_dns_external",
+                "value": "syndicate.cicd.cloud.natwestmarkets.com"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/costcenter",
+                "value": "placeholder"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/des_rhel7_ami_version_filter",
+                "value": "v1.0.6-b1559739860"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/des_apigw_ami_version_filter",
+                "value": "v1.0.6-b1559739854"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/public_alb_allowed_cidrs",
+                "value": "147.114.44.0/24,185.14.147.158/32,64.79.149.6/32"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/rbs_lanproxy_cidrs",
+                "value": "11.160.88.126/32,11.191.99.205/32,11.160.91.201/32,11.191.100.206/32"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/stream_binary_package",
+                "value": "6.2.24-r2"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/stream_data_source_cidrs",
+                "value": "11.160.28.2/32,11.160.28.6/32"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/stream_instance_count",
+                "value": "3"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/stream_instance_type",
+                "value": "t3.small"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/stream_root_volume_size",
+                "value": "10"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/stream_java_package",
+                "value": "1.8.0_92"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/apache_instance_type",
+                "value": "t3.micro"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/apache_instance_count",
+                "value": "3"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/apache_backends",
+                "value": "11.160.255.132/32:443,11.160.30.125/32:444,11.160.29.86/32:444,11.160.29.216/32:8089,11.160.29.254/32:27360,11.160.29.34/32:85,11.160.29.34/32:25321,11.160.30.93/32:443,11.160.30.85/32:443"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/internal_dnshealthcheck_urls",
+                "value": "/api/static-data/v1/admin/ping,/api/fx-benchmark/v1/admin/ping,/api/fx-gamma-hedger/v1/admin/ping,/api/fx-mp/v1/admin/ping,/api/fx-options/v1/admin/ping,/api/futures/v1/admin/ping"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/cto_subnet",
+                "value": "10.211.192.0/23"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/dx_aws_asn",
+                "value": "64676"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/dx_bgp_asn",
+                "value": "64588"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/dx_authkey",
+                "value": "8DrgYcCwTHBXwg7x"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/vlproxy_ingress_instance_type",
+                "value": "t3.small"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/vlproxy_root_volume_size",
+                "value": "10"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/vlproxy_harmony_ips",
+                "value": "11.195.101.58/32,11.193.165.36/32"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/vlproxy_serials",
+                "value": "HY1747-FU1872,HY1748-MB8540"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/vlproxy_default_password",
+                "value": "Admin"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/core/common/shield_notification_email",
+                "value": "warwick.mitchell@rbs.com,terry.smith@rbs.com"
+        }
+]

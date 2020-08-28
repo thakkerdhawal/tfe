@@ -1,0 +1,10 @@
+---
+# handlers file
+- name: restart splunk
+  command: sudo systemctl restart splunkd.service
+
+- name: stop splunk
+  command: sudo systemctl stop splunkd.service
+
+- name: start splunk
+  command: sudo systemctl start splunkd.service

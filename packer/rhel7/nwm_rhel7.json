@@ -1,0 +1,98 @@
+{
+    "variables": {
+      "region": "eu-west-2",
+      "rhel_version": "7.6",
+      "ami_name": "nwm-rhel7-ami",
+      "ami_description": "NWM Hardened RHEL",
+      "ami_version": "1.0.3",
+      "vault_ca_url": "https://vault-mm.web.rbsgrp.net/v1/ssh/ssh-client-signer/public_key",
+      "aws_profile": null,
+      "bastion_host": null,
+      "ssh_key_file": null
+    },
+    "builders": [{
+    "type": "amazon-ebs",
+    "instance_type": "t2.micro",
+    "ssh_username": "ec2-user",
+    "associate_public_ip_address": false,
+    "ssh_interface": "private_ip",
+    "encrypt_boot": true,
+    "communicator": "ssh",
+    "ssh_bastion_host": "{{user `bastion_host`}}",
+    "ssh_bastion_port": 22,
+    "ssh_bastion_username": "ec2-user",
+    "ssh_bastion_private_key_file": "{{user `ssh_key_file`}}",
+    "source_ami_filter": {
+      "filters": {
+        "virtualization-type": "hvm",
+        "name": "RHEL-{{user `rhel_version`}}_*-Access2-GP2",
+        "root-device-type": "ebs"
+      },
+      "owners": ["309956199498"],
+      "most_recent": true
+    },
+    "subnet_filter": {
+	  "filters": {
+	    "tag:Name": "lab-vpc-private-*"
+	  },
+      "most_free": true,
+	  "random": false
+    },
+    "security_group_filter": {
+	  "filters": {
+		"tag:Name": "lab-amicreate-sg"
+	  }
+	},
+    "disable_stop_instance": false,
+    "profile": "{{user `aws_profile`}}",
+    "region": "{{user `region`}}",
+    "ami_name": "{{user `ami_name`}}-v{{user `ami_version`}}-b{{timestamp}}",
+    "ami_description": "{{user `ami_description`}} {{user `rhel_version`}} - {{isotime \"Jan 02 2006 15:04:05\"}}",
+    "tags" : {
+      "Name": "{{user `ami_name`}}",
+      "RHEL Version": "{{user `rhel_version`}}",
+      "Version": "v{{user `ami_version`}}-b{{timestamp}}",
+      "Source-ami-uuid": "{{ uuid }}"
+    },
+    "ssh_pty" : "true"
+  }],
+
+  "provisioners": [
+    { 
+      "type": "shell-local",
+      "command": "curl -sk -o config/etc/ssh/vault-trusted-user-ca-key.pem {{user `vault_ca_url`}}"
+    },
+    {
+      "type": "file",
+      "source": "config",
+      "destination": "/home/ec2-user"
+    },
+    {
+      "type": "shell",
+      "pause_before": "15s",
+      "expect_disconnect": true,
+      "remote_folder": "/home/ec2-user",
+      "environment_vars": [
+        "POST_REBOOT=false"
+      ],
+      "execute_command": "{{ .Vars }} sudo -E sh '{{ .Path }}'",
+      "scripts": [
+         "scripts/rhel7-packer-build.sh"
+      ]
+    },
+    {
+      "type": "shell",
+      "pause_before": "60s",
+      "expect_disconnect": true,
+      "remote_folder": "/home/ec2-user",
+      "environment_vars": [
+        "POST_REBOOT=true"
+      ],
+      "execute_command": "{{ .Vars }} sudo -E sh '{{ .Path }}'",
+      "scripts": [
+         "scripts/rhel7-packer-build.sh"
+      ]
+    }
+  ]
+}
+

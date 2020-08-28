@@ -1,0 +1,24 @@
+#
+# Delete service by service ID (create new if doesn't exist)
+#
+# Input vars:
+# - apigwMgmtEndpoint
+# - apigwUser
+# - apigwPassword
+# - serviceId
+# Output vars:
+# - apigw_response_delete_service
+#
+- name: "Delete service - {{ serviceId }}"
+  uri:
+    url: '{{ apigwMgmtEndpoint }}/restman/1.0/services/{{ serviceId }}'
+    method: DELETE
+    force_basic_auth: yes
+    user: "{{ apigwUser }}"
+    password: "{{ apigwPassword }}"
+    headers:
+      Content-Type: 'application/xml'
+    validate_certs: no
+    status_code: 204
+  register: apigw_response_delete_service
+  changed_when: apigw_response_delete_service is succeeded

@@ -1,0 +1,39 @@
+######### Play 1: setup inventory #########
+
+
+
+- hosts: localhost
+  gather_facts: no
+  vars:
+    allowedState:
+        - reloaded
+        - started
+        - restarted
+        - stopped
+
+  tasks:
+  - name: "Fail when consulKey and targetHosts vars not defined"
+    fail: 
+       msg: "fail when consulKey and targetHosts vars not defined"
+    when: consulKey is not defined and targetHosts is not defined 
+
+  - name: "Fail when state is not in allowed list: {{ allowedState }} " 
+    fail: 
+       msg: "State: {{ state }} is not in allowed list: {{ allowedState }}"
+    when: state not in allowedState 
+
+  roles:
+  - role: generic_addHosts
+    vars:
+      consulKeyPath: "{{ consulKey | default('')  }}?raw"
+      groupName: sysHosts
+
+######### Play 2: apply changes #########
+- hosts: sysHosts
+  remote_user: ec2-user
+  tasks:
+  - name: "State: {{ state }}; On systemd service: {{ serviceName }}"
+    systemd:
+      state: "{{ state }}"
+      name:  "{{ serviceName }}"
+    become: yes

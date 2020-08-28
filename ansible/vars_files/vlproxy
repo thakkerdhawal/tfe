@@ -1,0 +1,16 @@
+vlproxyHome: /opt/app/ecomm/VLProxy
+vlproxyEnv: "{{ awsEnv }}"
+theUser: e0000047
+sshUser: ec2-user
+theMode: 0755
+afUrl: "https://artifactory-1.dts.fm.rbsgrp.net/artifactory/eComm-private-releases-local/cleo/vlproxy/VLProxy.bin"
+afFile: "{{ afUrl | basename }}"
+destFilePath: "{{ vlproxyHome }}/{{ afFile }}"
+cwagent_logging:
+  /opt/app/ecomm/VLProxy/logs/VLProxyd.out:
+      log_group_name: cleo_vlproxystandardLogs
+  /opt/app/ecomm/VLProxy/logs/VLProxyd.log:
+      log_group_name: cleo_vlproxystandardLogs
+  /opt/app/ecomm/VLProxy/logs/VLProxy.xml:
+      log_group_name: cleo_vlproxyXml
+mon_ec2_namespace: "vlproxy"

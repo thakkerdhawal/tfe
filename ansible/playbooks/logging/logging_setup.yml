@@ -1,0 +1,75 @@
+######### Play 1: setup inventory #########
+
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  roles:
+  - role: ../../roles/generic_addHosts
+    vars:
+      consulKeyPath: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/{{ awsEnv | mandatory }}/terraform/shared-services/outputs/logging/{{ awsRegion | mandatory }}/logging_{{ splunkRole | default('splunk_fwd') }}_private_ips?raw"
+      groupName: logging,{{ splunkRole }}
+
+######### Play 2: apply changes #########
+- hosts: logging
+  remote_user: ec2-user
+  become: true
+  become_user: "{{ theUser }}"
+  vars_files:
+    - ../../vars_files/logging
+    - "../../vars_files/{{ splunkRole }}"
+  tasks:
+  - name: "check for consul token"
+    delegate_to: localhost
+    connection: local
+    run_once: true
+    set_fact:
+      consulTokenPassword: "{{ lookup('env','CONSUL_HTTP_TOKEN') }}"
+    when: 
+      - consulTokenPassword is not defined
+      - splunkRole == "splunk_fwd"
+      - awsEnv != "prod"
+  - name: "get target output server for test environment"
+    delegate_to: localhost
+    connection: local
+    become: false
+    run_once: true
+    uri:
+      url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/{{ awsEnv | mandatory }}/terraform/shared-services/outputs/logging/{{ awsRegion | mandatory }}/logging_splunk_web_private_ips?raw"
+      headers:
+        X-Consul-Token: "{{ consulTokenPassword }}"
+      return_content: true
+    register: outputServerIps
+    when: 
+      - splunkRole == "splunk_fwd"
+      # lab use a dummy Splunk server 
+      - awsEnv == "lab"
+  - name: "set target output server for test environment"
+    set_fact:
+      splunkOutputServers: "{{ outputServerIps.content }}:9999"
+    when: 
+      - splunkRole == "splunk_fwd"
+      - awsEnv == "lab"
+  - name: "use CA cert for testing"
+    set_fact:
+      splunkCACertFile: dummyca.pem
+    when: splunkCertPassword == "dummyCertForTesting"
+  - name: "install Splunk"
+    include_role:
+      name: ../../roles/splunk_install
+  - name: "setup cw monitor namespace"
+    include_role:
+      name: ../../roles/generic_cwagent
+  - meta: flush_handlers
+  - name: "health check"
+    include_role:
+      name: ../../roles/generic_healthCheck
+    vars: 
+      thePort: "{{ item.thePort }}"
+      theUrl: "{{ item.theUrl }}"
+      theString: "{{ item.theString }}"
+      theDelay: 30
+    loop:
+      # Note: port checking as a workaround to add delay to Url check
+      - { thePort: "{{ splunkMgmtPort }}", theUrl: "false", theString: "donotcheck" }
+      - { thePort: "false", theUrl: "https://{{ ansible_default_ipv4.address }}:{{ splunkMgmtPort }}", theString: "splunkd" }
+

@@ -1,0 +1,65 @@
+[
+      {
+        "index": 0,
+        "max": 20,
+        "min": 1,
+        "questionName": "awsEnv",
+        "required": true,
+        "type": "text",
+        "variable": "awsEnv"
+      },
+      {
+        "index": 1,
+        "max": 20,
+        "min": 1,
+        "questionName": "awsRegion",
+        "required": true,
+        "type": "text",
+        "variable": "awsRegion"
+      },
+      {
+        "index": 2,
+        "max": 20,
+        "min": 1,
+        "questionName": "sshUser",
+        "required": true,
+        "type": "text",
+        "variable": "sshUser"
+      },
+      {
+        "index": 3,
+        "max": 20,
+        "min": 1,
+        "questionName": "theUser",
+        "required": true,
+        "type": "text",
+        "variable": "theUser"
+      },
+      {
+        "index": 4,
+        "max": 100,
+        "min": 1,
+        "questionName": "vlproxyConfigPassword",
+        "required": true,
+        "type": "password",
+        "variable": "vlproxyConfigPassword"
+      },
+      {
+        "index": 5,
+        "max": 100,
+        "min": 1,
+        "questionName": "consulTokenPassword",
+        "required": true,
+        "type": "password",
+        "variable": "consulTokenPassword"
+      },
+      {
+        "index": 6,
+        "max": 10,
+        "min": 1,
+        "questionName": "vlproxyEnv",
+        "required": true,
+        "type": "text",
+        "variable": "vlproxyEnv"
+      }
+]

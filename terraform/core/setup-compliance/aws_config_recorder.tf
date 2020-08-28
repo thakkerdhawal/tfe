@@ -1,0 +1,1 @@
+../../shared-services/setup-compliance/aws_config_recorder.tf

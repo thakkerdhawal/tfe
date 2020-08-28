@@ -1,0 +1,27 @@
+#
+# Create Cluster Wide Property
+#
+# Input vars:
+# - apigwMgmtEndpoint
+# - apigwUser
+# - apigwPassword
+# - clusterPropertyPayload
+# Output vars:
+# - apigw_response_create_clusterproperty
+#
+- name: "create Cluster Wide Property"
+  uri:
+    url: '{{ apigwMgmtEndpoint }}/restman/1.0/clusterProperties'
+    method: POST
+    force_basic_auth: yes
+    user: "{{ apigwUser }}"
+    password: "{{ apigwPassword }}"
+    headers:
+      Content-Type: 'application/xml'
+    validate_certs: no
+    body: "{{ clusterPropertyPayload }}"
+    status_code: 201
+    return_content: yes
+  register: apigw_response_create_clusterproperty
+  changed_when: apigw_response_create_clusterproperty is succeeded
+

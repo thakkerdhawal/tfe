@@ -1,0 +1,19 @@
+# role var - generic_afServerFileCopy
+afUrl: "https://artifactory-1.dts.fm.rbsgrp.net/artifactory/eComm-private-releases-local/Redhat/Apache/2.4.29/RBSapache-2.4.29-rhel7.RELEASE-core-build-V001.tgz"
+destFilePath: "/var/tmp/{{ afFile }}"
+
+# role var - deploy_apache 
+packageLocation: "{{ destFilePath }}"
+apacheUpdateFlag: True 
+
+# config for generic_cwagent (logging)
+cwagent_logging:
+  /opt/app/ecomm/Web/httpd-agilemarkets/current/httpd/logs/error.log.*:
+      log_group_name: apache_error_logs
+  /opt/app/ecomm/Web/httpd-agilemarkets/current/httpd/logs/access.log.*:
+      log_group_name: apache_access_logs
+  /opt/app/ecomm/Web/httpd-bondsyndicate/current/httpd/logs/error.log.*:
+      log_group_name: apache_error_logs
+  /opt/app/ecomm/Web/httpd-bondsyndicate/current/httpd/logs/access.log.*:
+      log_group_name: apache_access_logs
+mon_ec2_namespace: "apache"

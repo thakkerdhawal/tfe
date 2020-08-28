@@ -1,0 +1,59 @@
+######## Play 1: setup inventory ########
+
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  roles:
+  - role: ../../roles/generic_addHosts
+    vars:
+      consulKeyPath: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/{{ awsEnv | mandatory }}/terraform/core/outputs/agilemarkets/{{ awsRegion | mandatory }}/apigw_instances_private_ip?raw"
+      groupName: apigw
+ 
+######## Play 2: configura API Gateway ########
+- hosts: apigw
+  vars_files:
+  - ../../vars_files/apigw
+  - files/config/{{ 'nonprod' if awsEnv != 'prod' else 'prod' }}.yml
+  remote_user: "{{ remoteUser }}"
+  gather_facts: yes
+  vars:
+    forceUpdate: false
+  tasks:
+  - name: "retrieve password from Consul"
+    block:
+    - name: "check for consul token"
+      set_fact:
+        consulTokenPassword: "{{ lookup('env','CONSUL_HTTP_TOKEN') }}"
+      when: consulTokenPassword is not defined 
+    - fail:
+        msg: "Valid consul token required in either env var 'CONSUL_HTTP_TOKEN' or as input var 'consulTokenPassword'"
+      when: consulTokenPassword == ""
+    - name: "lookup initial password in Consul"
+      uri:
+        url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/{{ awsEnv | mandatory }}/terraform/core/outputs/agilemarkets/{{ awsRegion | mandatory }}/apigw_initial_password?raw"
+        headers:
+          X-Consul-Token: "{{ consulTokenPassword }}"
+        status_code: 200
+        return_content: true
+      register: consulOutputPassword
+    - name: "set initial password"
+      set_fact:
+        apigwPassword: "{{ consulOutputPassword.content }}"
+    when: apigwPassword is not defined 
+    delegate_to: localhost
+    connection: local
+    run_once: true
+
+  - name: "import list of trusted certificates"
+    block:
+    - include_tasks: tasks/importTrustedCertificate.yml
+      vars:
+        trustedCertificateName: "{{ item.name }}"
+        trustedCertificateProperties: "{{ item.properties.replace(' ', '').split(',') }}"
+        trustedCertificateData: "{{ lookup('file', 'files/trustedCertificates/' + item.name + '.pem') | regex_replace('.*CERTIFICATE.*','') }}"
+      loop: "{{ trustedCertificates }}"
+
+  - name: "Health Check"
+    include_tasks: tasks/runHealthChecks.yml
+
+

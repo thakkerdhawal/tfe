@@ -1,0 +1,34 @@
+---
+- name: "use consul as source of inventory"
+  block:
+  - name: "check for consul token"
+    set_fact:
+      consulTokenPassword: "{{ lookup('env','CONSUL_HTTP_TOKEN') }}"
+    when: consulTokenPassword is not defined
+  - fail:
+      msg: "Valid consul token required in either env var 'CONSUL_HTTP_TOKEN' or as input var 'consulTokenPassword'"
+    when: consulTokenPassword == ""
+  - name: "lookup target instances in Consul"
+    uri:
+      url: "{{ consulKeyPath | mandatory }}"
+      headers:
+        X-Consul-Token: "{{ consulTokenPassword }}"
+      return_content: true
+      validate_certs: no
+    register: hostsIps
+  - name: "add hosts to group {{ groupName }}"
+    add_host:
+      name: "{{ item }}"
+      groups: "{{ groupName | mandatory }}"
+    with_items:
+      - "{{ hostsIps.content.split(',') }}"
+  when: targetHosts is not defined
+- name: "use user input as source of inventory"
+  block:
+  - name: "add list of hosts provided on command line to group {{ groupName }}"
+    add_host:
+      name: "{{ item }}"
+      groups: "{{ groupName | mandatory }}"
+    loop: "{{ targetHosts }}"
+  when: targetHosts is defined
+

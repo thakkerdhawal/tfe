@@ -1,0 +1,68 @@
+---
+# defaults file for awsProxyJump
+### Consul Info ###
+consulHost: ecomm.fm.rbsgrp.net
+consulPort: 443
+
+### Bastion Host IP Info ###
+euWest1Bastions:
+ - { label: lab, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/lab/terraform/shared-services/outputs/bastion/eu-west-1/bastion_hosts_private_ips?raw" }
+ - { label: cicd, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/cicd/terraform/shared-services/outputs/bastion/eu-west-1/bastion_hosts_private_ips?raw" }
+ - { label: prod, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/prod/terraform/shared-services/outputs/bastion/eu-west-1/bastion_hosts_private_ips?raw" }
+euWest2Bastions:
+ - { label: lab, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/lab/terraform/shared-services/outputs/bastion/eu-west-2/bastion_hosts_private_ips?raw" }
+ - { label: cicd, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/cicd/terraform/shared-services/outputs/bastion/eu-west-2/bastion_hosts_private_ips?raw" }
+ - { label: prod, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/prod/terraform/shared-services/outputs/bastion/eu-west-2/bastion_hosts_private_ips?raw" }
+
+### Core Env Subnets ###
+## eu-west-1
+coreEuWest1IntraSubnets:
+ - { label: lab, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/lab/variables/core/eu-west-1/intra_subnets?raw" }
+ - { label: nonprod, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/nonprod/variables/core/eu-west-1/intra_subnets?raw" }
+ - { label: cicd, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/cicd/variables/core/eu-west-1/intra_subnets?raw" }
+ - { label: prod, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/prod/variables/core/eu-west-1/intra_subnets?raw" }
+coreEuWest1PublicSubnets:
+ - { label: lab, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/lab/variables/core/eu-west-1/public_subnets?raw" }
+ - { label: nonprod, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/nonprod/variables/core/eu-west-1/public_subnets?raw" }
+ - { label: cicd, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/cicd/variables/core/eu-west-1/public_subnets?raw" }
+ - { label: prod, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/prod/variables/core/eu-west-1/public_subnets?raw" }
+## eu-west-2
+coreEuWest2IntraSubnets:
+ - { label: lab, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/lab/variables/core/eu-west-2/intra_subnets?raw" }
+ - { label: nonprod, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/nonprod/variables/core/eu-west-2/intra_subnets?raw" }
+ - { label: cicd, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/cicd/variables/core/eu-west-2/intra_subnets?raw" }
+ - { label: prod, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/prod/variables/core/eu-west-2/intra_subnets?raw" }
+coreEuWest2PublicSubnets:
+ - { label: lab, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/lab/variables/core/eu-west-2/public_subnets?raw" }
+ - { label: nonprod, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/nonprod/variables/core/eu-west-2/public_subnets?raw" }
+ - { label: cicd, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/cicd/variables/core/eu-west-2/public_subnets?raw" }
+ - { label: prod, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/prod/variables/core/eu-west-2/public_subnets?raw" }
+
+### Shared Services Env Subnets ###
+## eu-west-1
+ssEuWest1IntraSubnets:
+ - { label: lab, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/lab/variables/shared-services/eu-west-1/intra_subnets?raw" }
+ - { label: cicd, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/cicd/variables/shared-services/eu-west-1/intra_subnets?raw" }
+ - { label: prod, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/prod/variables/shared-services/eu-west-1/intra_subnets?raw" }
+ssEuWest1PrivateSubnets:
+ - { label: lab, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/lab/variables/shared-services/eu-west-1/private_subnets?raw" }
+ - { label: cicd, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/cicd/variables/shared-services/eu-west-1/private_subnets?raw" }
+ - { label: prod, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/prod/variables/shared-services/eu-west-1/private_subnets?raw" }
+ssEuWest1PublicSubnets:
+ - { label: lab, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/lab/variables/shared-services/eu-west-1/public_subnets?raw" }
+ - { label: cicd, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/cicd/variables/shared-services/eu-west-1/public_subnets?raw" }
+ - { label: prod, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/prod/variables/shared-services/eu-west-1/public_subnets?raw" }
+## eu-west-2
+ssEuWest2IntraSubnets:
+ - { label: lab, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/lab/variables/shared-services/eu-west-2/intra_subnets?raw" }
+ - { label: cicd, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/cicd/variables/shared-services/eu-west-2/intra_subnets?raw" }
+ - { label: prod, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/prod/variables/shared-services/eu-west-2/intra_subnets?raw" }
+ssEuWest2PrivateSubnets:
+ - { label: lab, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/lab/variables/shared-services/eu-west-2/private_subnets?raw" }
+ - { label: cicd, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/cicd/variables/shared-services/eu-west-2/private_subnets?raw" }
+ - { label: prod, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/prod/variables/shared-services/eu-west-2/private_subnets?raw" }
+ssEuWest2PublicSubnets:
+ - { label: lab, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/lab/variables/shared-services/eu-west-2/public_subnets?raw" }
+ - { label: cicd, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/cicd/variables/shared-services/eu-west-2/public_subnets?raw" }
+ - { label: prod, url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/prod/variables/shared-services/eu-west-2/public_subnets?raw" }
+

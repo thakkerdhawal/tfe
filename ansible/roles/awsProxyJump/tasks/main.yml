@@ -1,0 +1,282 @@
+---
+# tasks file for awsProxyJump
+#
+
+- name: "check for consul token"
+  set_fact: 
+    consulTokenPassword: "{{ lookup('env','CONSUL_HTTP_TOKEN') }}"
+  when: consulTokenPassword is not defined
+    
+- fail:
+    msg: "Valid consul token required in either env var 'CONSUL_HTTP_TOKEN' or as input var 'consulToken'"
+  when: consulTokenPassword == ""
+
+- name: "Get Ips of EU-West-1 bastion hosts from Consul"
+  uri: 
+    url: "{{ item.url }}"
+    headers: 
+     X-Consul-Token: "{{ consulTokenPassword }}"
+    return_content: true
+    validate_certs: no
+    status_code: 200,404
+  with_items: 
+   - "{{ euWest1Bastions }}"
+  register: euwest1BastionIps
+
+- name: "Get Ips of EU-West-2 bastion hosts from Consul"
+  uri: 
+    url: "{{ item.url }}"
+    headers: 
+     X-Consul-Token: "{{ consulTokenPassword }}"
+    return_content: true
+    validate_certs: no
+    status_code: 200,404
+  with_items: 
+   - "{{ euWest2Bastions }}"
+  register: euwest2BastionIps
+
+- name: "Get Intra Subnets of Core EU-West-1 environments"
+  uri: 
+    url: "{{ item.url }}"
+    headers: 
+     X-Consul-Token: "{{ consulTokenPassword }}"
+    return_content: true
+    validate_certs: no
+    status_code: 200,404
+  with_items: 
+   - "{{ coreEuWest1IntraSubnets }}"
+  register: coreEuWest1IntraSubs
+
+- name: "Get Public Subnets of Core EU-West-1 environments"
+  uri: 
+    url: "{{ item.url }}"
+    headers: 
+     X-Consul-Token: "{{ consulTokenPassword }}"
+    return_content: true
+    validate_certs: no
+    status_code: 200,404
+  with_items: 
+   - "{{ coreEuWest1PublicSubnets }}"
+  register: coreEuWest1PublicSubs
+
+- name: "Get Intra Subnets of Core EU-West-2 environments"
+  uri: 
+    url: "{{ item.url }}"
+    headers: 
+     X-Consul-Token: "{{ consulTokenPassword }}"
+    return_content: true
+    validate_certs: no
+    status_code: 200,404
+  with_items: 
+   - "{{ coreEuWest2IntraSubnets }}"
+  register: coreEuWest2IntraSubs
+
+- name: "Get Public Subnets of Core EU-West-2 environments"
+  uri: 
+    url: "{{ item.url }}"
+    headers: 
+     X-Consul-Token: "{{ consulTokenPassword }}"
+    return_content: true
+    validate_certs: no
+    status_code: 200,404
+  with_items: 
+   - "{{ coreEuWest2PublicSubnets }}"
+  register: coreEuWest2PublicSubs
+
+- name: "Get Intra Subnets of Shared-Services EU-West-1 environments"
+  uri: 
+    url: "{{ item.url }}"
+    headers: 
+     X-Consul-Token: "{{ consulTokenPassword }}"
+    return_content: true
+    validate_certs: no
+    status_code: 200,404
+  with_items: 
+   - "{{ ssEuWest1IntraSubnets }}"
+  register: ssEuWest1IntraSubs
+
+- name: "Get Private Subnets of Shared-Services EU-West-1 environments"
+  uri: 
+    url: "{{ item.url }}"
+    headers: 
+     X-Consul-Token: "{{ consulTokenPassword }}"
+    return_content: true
+    validate_certs: no
+    status_code: 200,404
+  with_items: 
+   - "{{ ssEuWest1PrivateSubnets }}"
+  register: ssEuWest1PrivateSubs
+
+- name: "Get Public Subnets of Shared-Services EU-West-1 environments"
+  uri: 
+    url: "{{ item.url }}"
+    headers: 
+     X-Consul-Token: "{{ consulTokenPassword }}"
+    return_content: true
+    validate_certs: no
+    status_code: 200,404
+  with_items: 
+   - "{{ ssEuWest1PublicSubnets }}"
+  register: ssEuWest1PublicSubs
+
+- name: "Get Intra Subnets of Shared-Services EU-West-2 environments"
+  uri: 
+    url: "{{ item.url }}"
+    headers: 
+     X-Consul-Token: "{{ consulTokenPassword }}"
+    return_content: true
+    validate_certs: no
+    status_code: 200,404
+  with_items: 
+   - "{{ ssEuWest2IntraSubnets }}"
+  register: ssEuWest2IntraSubs
+
+- name: "Get Private Subnets of Shared-Services EU-West-2 environments"
+  uri: 
+    url: "{{ item.url }}"
+    headers: 
+     X-Consul-Token: "{{ consulTokenPassword }}"
+    return_content: true
+    validate_certs: no
+    status_code: 200,404
+  with_items: 
+   - "{{ ssEuWest2PrivateSubnets }}"
+  register: ssEuWest2PrivateSubs
+
+- name: "Get Public Subnets of Shared-Services EU-West-2 environments"
+  uri: 
+    url: "{{ item.url }}"
+    headers: 
+     X-Consul-Token: "{{ consulTokenPassword }}"
+    return_content: true
+    validate_certs: no
+    status_code: 200,404
+  with_items: 
+   - "{{ ssEuWest2PublicSubnets }}"
+  register: ssEuWest2PublicSubs
+
+- name: The IPs of EU-West-1 Bastion Hosts are
+  debug: msg="{{ item.content }}" verbosity=1
+  with_items: 
+   - "{{ euwest1BastionIps.results }}"
+  loop_control:
+   label: "{{ item.content }}"
+
+ 
+- name: The IPs of EU-West-2 Bastion Hosts are
+  debug: msg="{{ item.content }}"  verbosity=1
+  with_items: 
+   - "{{ euwest2BastionIps.results }}"
+  loop_control:
+   label: "{{ item.content }}"
+
+- name: The Intra Subnets for Core EU-West-1 are
+  debug: msg="{{ item.content.split(',') }}" verbosity=1
+  with_items: 
+   - "{{ coreEuWest1IntraSubs.results }}"
+  loop_control:
+   label: "{{ item.content }}"
+
+- name: The Public Subnets for Core EU-West-1 are
+  debug: msg="{{ item.content.split(',') }}" verbosity=1
+  with_items: 
+   - "{{ coreEuWest1PublicSubs.results }}"
+  loop_control:
+   label: "{{ item.content }}"
+ 
+- name: The Intra Subnets for Core EU-West-2 are
+  debug: msg="{{ item.content.split(',') }}" verbosity=1
+  with_items: 
+   - "{{ coreEuWest2IntraSubs.results }}"
+  loop_control:
+   label: "{{ item.content }}"
+
+- name: The Public Subnets for Core EU-West-2 are
+  debug: msg="{{ item.content.split(',') }}" verbosity=1
+  with_items: 
+   - "{{ coreEuWest2PublicSubs.results }}"
+  loop_control:
+   label: "{{ item.content }}"
+
+- name: The Intra Subnets for Shared Services EU-West-1 are
+  debug: msg="{{ item.content.split(',') }}" verbosity=1
+  with_items: 
+   - "{{ ssEuWest1IntraSubs.results }}"
+  loop_control:
+   label: "{{ item.content }}"
+
+- name: The Private Subnets for Shared Services EU-West-1 are
+  debug: msg="{{ item.content.split(',') }}" verbosity=1
+  with_items: 
+   - "{{ ssEuWest1PrivateSubs.results }}"
+  loop_control:
+   label: "{{ item.content }}"
+
+- name: The Public Subnets for Shared Services EU-West-1 are
+  debug: msg="{{ item.content.split(',') }}" verbosity=1
+  with_items: 
+   - "{{ ssEuWest1PublicSubs.results }}"
+  loop_control:
+   label: "{{ item.content }}"
+
+- name: The Intra Subnets for Shared Services EU-West-2 are
+  debug: msg="{{ item.content.split(',') }}" verbosity=1
+  with_items: 
+   - "{{ ssEuWest2IntraSubs.results }}"
+  loop_control:
+   label: "{{ item.content }}"
+
+- name: The Private Subnets for Shared Services EU-West-2 are
+  debug: msg="{{ item.content.split(',') }}" verbosity=1
+  with_items: 
+   - "{{ ssEuWest2PrivateSubs.results }}"
+  loop_control:
+   label: "{{ item.content }}"
+
+- name: The Public Subnets for Shared Services EU-West-2 are
+  debug: msg="{{ item.content.split(',') }}" verbosity=1
+  with_items: 
+   - "{{ ssEuWest2PublicSubs.results }}"
+  loop_control:
+   label: "{{ item.content }}"
+
+# Keep for reference for template
+#- debug: msg="The IPs of EU-West-1 Bastion Hosts are {{ euwest1BastionIps.results.0.content }}" verbosity=1
+
+- name: Capture absolute path of curent-user home directory (to overcome tilde issue with ssh_args in ansible.cfg)
+  set_fact: myHome="{{ lookup('env', 'HOME') }}"
+
+- name: "Produce template file at location $HOME/ssh_config.{{ awsEnv }}-core"
+  template: src=sshConfig.j2 dest=$HOME/ssh_config.awsNwm mode=0600
+  tags: 
+   - template
+
+- name: Create local ansible.cfg file to utilise new sshconfig file
+  template: src=ansible.cfg.j2 dest="{{ playbook_dir }}/../ansible.cfg"
+
+- name: Create inventory/hosts file to cater for localhost and local_connection
+  template: src=hosts.j2 dest="{{ playbook_dir }}/../inventory/hosts"
+
+#### This will be the method when we can use Consul modules ####
+#- name: "Get Ip of lab EU-West-1 bastion host from Consul"
+#  consul_kv:
+#   host: "{{ consulHost }}"
+#   port: "{{ consulPort }}"
+#   key: "{{ euWest1IpOutput }}" 
+#   state: acquire
+#   token: "{{ consulTokenPassword }}"
+#  register: euwest1BastionIP
+#  tags:
+#   - consul
+#
+#- name: "Get Ip of lab EU-West-2 bastion host from Consul"
+#  consul_kv:
+#   host: "{{ consulHost }}"
+#   port: "{{ consulPort }}"
+#   key: "{{ euWest1IpOutput }}" 
+#   state: acquire
+#   token: "{{ consulTokenPassword }}"
+#  register: euwest2BastionIP
+#  tags:
+#   - consul
+

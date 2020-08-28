@@ -1,0 +1,31 @@
+Prod Environments:
+
+1)	terraform-application-nwm-prod
+
+
+    ADD:
+    key "APPLICATION/NWM/" { policy = "read" }
+    key "APPLICATION/NWM/PROD/TERRAFORM/CORE/" { policy = "write" }
+    session "APPLICATION/NWM/PROD/TERRAFORM/CORE/" { policy = "write" }
+    agent "" { policy = "read" }
+
+2)	terraform-application-nwm-prod-variables
+
+
+    ADD:
+    key "APPLICATION/NWM/PROD/VARIABLES/CORE/" { policy = "write" }
+
+3)	terraform-application-sharedservices-prod
+
+    
+    ADD:
+    key "APPLICATION/NWM/" { policy = "read" }
+    key "APPLICATION/NWM/PROD/TERRAFORM/SHARED-SERVICES/" { policy = "write" }
+    session "APPLICATION/NWM/PROD/TERRAFORM/SHARED-SERVICES/" { policy = "write" }
+    agent "" { policy = "read" }
+
+
+4)	terraform-application-sharedservices-prod-variables
+
+    ADD:
+    key "APPLICATION/NWM/PROD/VARIABLES/SHARED-SERVICES/" { policy = "write" }

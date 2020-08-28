@@ -1,0 +1,5 @@
+<IfModule proxy_module>
+  ProxyPreserveHost On
+  ProxyPass /api/prism/ https://11.160.30.85/api/prism/
+  ProxyPassReverse /api/prism/ https://11.160.30.85/api/prism/
+</IfModule>

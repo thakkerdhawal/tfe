@@ -1,0 +1,1 @@
+../../shared-services/setup-compliance/nwm_aws-config_rules.tf

@@ -1,0 +1,14 @@
+---
+
+- name: Copy over the NTP Config file
+  copy: 
+    src: ntp.conf
+    dest: /etc/ntp.conf
+    owner: root
+    group: root
+    mode: 640
+  become: yes
+  notify:
+  - restart ntpd
+
+

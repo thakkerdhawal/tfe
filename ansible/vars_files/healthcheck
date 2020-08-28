@@ -1,0 +1,87 @@
+lab:
+  # API Gateway status check
+  - theUrl: https://www.lab.cloud.agilemarkets.com/check/wsg/local
+    theString: "donotcheck"
+  # Stream instances status check
+  - theUrl: https://stream1.lab.cloud.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  - theUrl: https://stream2.lab.cloud.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  - theUrl: https://stream3.lab.cloud.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  - theUrl: https://stream4.lab.cloud.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  - theUrl: https://stream5.lab.cloud.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  - theUrl: https://stream6.lab.cloud.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  # FXMP - can not check at the moment as it requires client cert
+
+cicd:
+  # API Gateway status check
+  - theUrl: https://www.cicd.cloud.agilemarkets.com/check/wsg/local
+    theString: "donotcheck"
+  # Stream instances status check
+  - theUrl: https://stream1.cicd.cloud.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  - theUrl: https://stream2.cicd.cloud.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  - theUrl: https://stream3.cicd.cloud.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  - theUrl: https://stream4.cicd.cloud.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  - theUrl: https://stream5.cicd.cloud.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  - theUrl: https://stream6.cicd.cloud.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  # FXMP - can not check at the moment as it requires client cert
+
+nonprod:
+  # API Gateway status check
+  - theUrl: https://uat3.agilemarkets.com/check/wsg/local
+    theString: "donotcheck"
+  # AgileMarkets E2E test via API Gateway
+  - theUrl: https://uat3.agilemarkets.com/api/spreadsheet/test
+    theString: "pong"
+  # Stream instances status check (to be changed to 1-6)
+  - theUrl: https://uatstream5.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  - theUrl: https://uatstream6.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  - theUrl: https://uatstream7.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  - theUrl: https://uatstream8.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  - theUrl: https://uatstream9.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  - theUrl: https://uatstream10.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  # FXMP - can not check at the moment as it requires client cert
+  # Cleo check - can not check as  We don't have line of sight at the moment.
+  # - thePort: 22
+  #   theHost: uatfiletransfer.natwestmarkets.com
+
+prod:
+  # API Gateway status check
+  - theUrl: https://www5.agilemarkets.com/check/wsg/local
+    theString: "donotcheck"
+  # AgileMarkets E2E test via API Gateway
+  - theUrl: https://www5.agilemarkets.com/api/spreadsheet/test
+    theString: "pong"
+  # Stream instances status check (to be changed to 1-6)
+  - theUrl: https://stream5.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  - theUrl: https://stream6.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  - theUrl: https://stream7.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  - theUrl: https://stream8.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  - theUrl: https://stream9.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  - theUrl: https://stream10.agilemarkets.com
+    theString: "Royal Bank of Scotland"
+  # FXMP - can not check at the moment as it requires client cert
+  # Cleo check - can not check as  We don't have line of sight at the moment.
+  # - thePort: 22
+  #   theHost: filetransfer.natwestmarkets.com

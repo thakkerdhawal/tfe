@@ -1,0 +1,179 @@
+#
+# Setup Listener Port
+#
+# Input vars:
+# - apigwMgmtEndpoint
+# - apigwUser
+# - apigwPassword
+# - portName
+# - portNumber
+# - serviceName
+# - keyEncoded
+# - keyAlias
+# - forceUpdate
+#
+# Output vars:
+#
+
+- name: "Block: variables"
+  block:
+  - name: "set initial variables"
+    set_fact:
+      privateKeyExists: false
+      updatePrivateKey: false
+      portExists: false
+      updatePort: false
+
+- name: "validate inputs on target gateway"
+  block:
+  - name: "Child task: look up target service"
+    include_tasks: tasks/getServiceByName.yml
+  - name: "fail if target service can not be found"
+    delegate_to: localhost
+    connection: local
+    xml:
+      xmlstring: "{{ apigw_response_get_service_by_name.content }}"
+      namespaces:
+        l7: "{{ apigwXmlNamespace }}"
+      xpath: /l7:List/l7:Item/l7:Id
+      content: text
+    register: xmlResult
+  - name: "extract service ID"
+    set_fact:
+      serviceId: "{{ xmlResult.matches[0] | dict2items | json_query('[0].value') }}"
+
+  - name: "Child task: lookup target private key"
+    include_tasks: tasks/getPrivateKey.yml
+  - name: "set var privateKeyExists"
+    set_fact:
+      privateKeyExists: true
+    when: apigw_response_get_privatekey.status == 200
+  - name: "mark private key for import if not found"
+    set_fact:
+      updatePrivateKey: true
+    when: apigw_response_get_privatekey.status == 404 
+  - name: "mark private key for import if specifically requested"
+    set_fact:
+      updatePrivateKey: true
+    when: privateKeyExists and forceUpdate
+  - name: "Checkpoint: keyEncoded and keyPassword need to be provided together"
+    fail:
+      msg: "ERROR: please provide private key for {{ portName }} with both keyEncoded and keyPassword"
+    when: 
+      - updatePrivateKey 
+      - ( keyEncoded is defined and keyPassword is not defined ) or ( keyEncoded is not defined and keyPassword is defined )
+
+  - name: "Child task: lookup target port by number"
+    include_tasks: tasks/getPortByNumber.yml
+  - name: "extract port id if there is a match by number"
+    delegate_to: localhost
+    connection: local
+    ignore_errors: true
+    xml:
+      xmlstring: "{{ apigw_response_get_port_by_number.content }}"
+      namespaces:
+        l7: "http://ns.l7tech.com/2010/04/gateway-management"
+      xpath: /l7:List/l7:Item/l7:Id
+      content: text
+    register: portIdByNumber
+  - name: "Child task: lookup target port by name"
+    include_tasks: tasks/getPortByName.yml
+  - name: "extract port id if there is a match by name"
+    delegate_to: localhost
+    connection: local
+    ignore_errors: true
+    xml:
+      xmlstring: "{{ apigw_response_get_port_by_number.content }}"
+      namespaces:
+        l7: "http://ns.l7tech.com/2010/04/gateway-management"
+      xpath: /l7:List/l7:Item/l7:Id
+      content: text
+    register: portIdByName
+  # Case 1: both number and name have a match - skip unless forceUpdate == true
+  - name: "Checkpoint: both port number and name match different objects"
+    fail:
+      msg: "ERROR: Provided number and name match different existing ports."
+    when:
+      - portIdByNumber is succeeded and portIdByName is succeeded
+      - portIdByNumber.matches[0] | json_query('*') | json_query('[0]') != portIdByName.matches[0] | json_query('*') | json_query('[0]')
+  - name: "set variable when a signle match is found"
+    set_fact:
+      updatePort: true
+      portExists: true
+      portId: "{{ portIdByNumber.matches[0] | json_query('*') | json_query('[0]') }}"
+    when:
+      - portIdByNumber is succeeded and portIdByName is succeeded
+      - portIdByNumber.matches[0] | json_query('*') | json_query('[0]') == portIdByName.matches[0] | json_query('*') | json_query('[0]')
+      - forceUpdate
+  # Case 2: only port number has a match - port needs to be updated
+  - name: "set variable portExists and portId"
+    set_fact:
+      updatePort: true
+      portExists: true
+      portId: "{{ portIdByNumber.matches[0] | json_query('*') | json_query('[0]') }}"
+    when: portIdByNumber is succeeded and portIdByName is failed
+  # Case 3: only port name has a match - port needs to be updated
+  - name: "set variable portExists and portId"
+    set_fact:
+      updatePort: true
+      portExists: true
+      portId: "{{ portIdByName.matches[0] | json_query('*') | json_query('[0]') }}"
+    when: portIdByName is succeeded and portIdByNumber is failed
+  # Case 4: no match
+  - name: "set variable when target port does not exist"
+    set_fact:
+      updatePort: true
+    when: portIdByName is failed and portIdByNumber is failed
+
+- name: "Block: setup private key (server certificate)"
+  block:
+  - name: "Child task: delete existing private key"
+    include_tasks: tasks/deletePrivateKey.yml
+    when: privateKeyExists
+  - name: "extract friendlyName from the private key provided"
+    shell: "echo {{ keyEncoded }} | base64 -d | openssl pkcs12 -in /dev/stdin -nodes -passin pass:'{{ keyPassword }}'"
+    register: keyInfo
+    delegate_to: localhost
+    connection: local
+    run_once: true
+    when: keyEncoded is defined and keyPassword is defined
+  - name: "set variable keyPayload from template for creating new private key"
+    set_fact:
+      keyPayload: "{{ lookup('template', 'templates/createPrivateKey.j2') }}"
+    vars:
+      KEYCN: "{{ keyAlias }}"
+    when: keyEncoded is not defined
+  - name: "set variable keyPayload from template for importing private key"
+    set_fact:
+      keyPayload: "{{ lookup('template', 'templates/importPrivateKey.j2') }}"
+    vars:
+      KEYDATA: "{{ keyEncoded }}"
+      KEYALIAS: "{{ keyInfo.stdout | regex_search('(friendlyName:.*)') | regex_replace('^friendlyName:\\s(.*)$', '\\1') }}"
+      KEYPASSWORD: "{{ keyPassword }}"
+    when: keyEncoded is defined
+  - name: "Child task: create dummy certs if private key is not provided"
+    include_tasks: tasks/createPrivateKey.yml
+    when: keyEncoded is not defined
+  - name: "Child task: import private key"
+    include_tasks: tasks/importPrivateKey.yml
+    when: keyEncoded is defined
+  when: updatePrivateKey
+
+- name: "Block: setup listener port"
+  block:
+  # prep the API call
+  - name: "set variable portPayload from template"
+    set_fact:
+      # NOTE: this is a temp template for FXMP to allow TLSv1 
+      portPayload: "{{ lookup('template', 'templates/createListenerPort_tls1.j2') }}"
+    vars:
+      PORTNAME: "{{ portName }}"
+      PORTNUMBER: "{{ portNumber }}"
+      KEYALIAS: "{{ keyAlias }}"
+      SERVICEID: "{{ serviceId }}"
+  - name: "Child task:  update listener port"
+    include_tasks: tasks/updatePort.yml
+    when: portExists and updatePort
+  - name: "Child task: create listener port"
+    include_tasks: tasks/createPort.yml
+    when: updatePort and not portExists 

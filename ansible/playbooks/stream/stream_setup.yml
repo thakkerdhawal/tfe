@@ -1,0 +1,65 @@
+## Play 1 - Gather hosts
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+  - name: add list of hosts 
+    include_role:
+      name: ../../roles/generic_addHosts
+    vars:
+      consulKeyPath: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/{{ awsEnv | mandatory }}/terraform/core/outputs/agilemarkets/{{ awsRegion | mandatory }}/stream_instances_private_ips?raw"
+      groupName: stream
+
+## Play 2 - Gather Consul variables and install binaries
+- hosts: stream 
+  gather_facts: no
+  vars_files:
+   - ../../vars_files/stream
+  tasks:
+  - name: Get Binary package versions 
+    block:
+    - name: Lookup package versions from Consul
+      uri:
+        url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/{{ awsEnv | mandatory }}/variables/core/common/{{ item }}?raw"
+        headers:
+          X-Consul-Token: "{{ hostvars['localhost']['consulTokenPassword'] }}"
+        status_code: 200
+        return_content: true
+      register: consulLookups
+      with_items:
+        - stream_java_package
+        - stream_binary_package
+        - agilemarkets_dns_external
+    - name: Record consul lookups 
+      set_fact: 
+        javaVersion: "{{ consulLookups.results.0.content }}"
+        streamVersion: "{{ consulLookups.results.1.content }}"
+        agilemarketsDnsExternal: "{{ consulLookups.results.2.content }}"
+    delegate_to: localhost
+    connection: local
+    run_once: true
+
+## Play 3 - Setup config files
+- hosts: stream
+  remote_user: ec2-user
+  become_user: "{{ streamUser }}"
+  become: true
+  vars_files:
+  - ../../vars_files/stream
+  roles:
+  - ../../roles/stream_config
+  - ../../roles/generic_cwagent
+  tasks:
+  - meta: flush_handlers
+  - name: "run health check"
+    include_role: 
+      name: ../../roles/generic_healthCheck
+    vars:
+      thePort: "{{ item.thePort | default(false, true) }}"
+      theUrl: "{{ item.theUrl | default(false, true) }}"
+      theString: "{{ item.theString | default('donotcheck', true) }}"
+    loop:
+    - { thePort: "18001" }
+    - { thePort: "25002" }
+    - { theUrl: "https://{{ ansible_default_ipv4.address }}:4447", theString: "Royal Bank of Scotland" }
+

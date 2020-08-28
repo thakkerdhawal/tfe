@@ -1,0 +1,6 @@
+umask 027
+readonly TMOUT=900
+HISTCONTROL=ignoredups
+readonly HISTCONTROL HISTFILE HISTIGNORE HISTFILESIZE
+mesg n 
+

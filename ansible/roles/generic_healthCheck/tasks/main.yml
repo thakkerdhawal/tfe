@@ -1,0 +1,108 @@
+---
+# tasks file for generic_healthCheck
+# 
+
+##### Port-Based Checks #####
+- name: "Wait for {{ theDelay }} seconds and perform a simple port check against port {{ thePort }}"
+  wait_for: 
+   port: "{{ thePort }}" 
+   host: "{{ theHost }}"
+   state: "{{ theState }}" 
+   delay: "{{ theDelay }}" 
+   timeout: "{{ theTimeout }}"
+  register: check1
+  ignore_errors: "{{ allowFailure | bool }}"
+  when: 
+   - thePort|lower != 'false'
+  tags: 
+   - port
+   - simple
+
+- name: Print output of simple port check
+  debug: var=check1
+  when: 
+   - debugMe|lower == 'true'
+   - thePort|lower != 'false'
+  tags: 
+   - port
+   - simple 
+
+- name: "Wait for {{ theDelay }} seconds then connect to port {{ thePort }} and check for string {{ theString }} in response"
+  wait_for: 
+   port: "{{ thePort }}" 
+   host: "{{ theHost }}"
+   state: "{{ theState }}" 
+   delay: "{{ theDelay }}" 
+   timeout: "{{ theTimeout }}"
+   search_regex: "{{ theString }}"
+  register: check2
+  ignore_errors: "{{ allowFailure | bool }}"
+  when: 
+   - thePort|lower != 'false'
+   - theString|lower != 'donotcheck'
+  tags: 
+   - port
+   - pstring 
+
+- name: Print output of port and string check
+  debug: var=check2
+  when: 
+   - debugMe|lower == 'true'
+   - thePort|lower != 'false'
+   - theString|lower != 'donotcheck'
+  tags: 
+   - port
+   - pstring 
+
+##### URL-based Checks #####
+- name: "Inspect URL {{ theUrl }} and check for status code {{ theStatusCode }}"
+  uri:
+   url: "{{ theUrl }}"
+   status_code: "{{ theStatusCode }}"
+   timeout: "{{ theTimeout }}"
+   validate_certs: no
+  register: check3
+  ignore_errors: "{{ allowFailure | bool }}"
+  when: 
+   - theUrl|lower != 'false'  
+  tags: 
+   - url
+   - status
+ 
+- name: Print output of URL status code check
+  debug: var=check3 
+  when: 
+   - debugMe|lower == 'true'
+   - theUrl|lower != 'false'  
+  tags: 
+   - url
+   - status
+
+- name: "Inspect URL {{ theUrl }} and check for string {{ theString }} in the returned content"
+  uri:
+   url: "{{ theUrl }}"
+   status_code: "{{ theStatusCode }}"
+   timeout: "{{ theTimeout }}"
+   return_content: yes
+   validate_certs: no
+  register: check4
+  ignore_errors: "{{ allowFailure | bool }}"
+  when: 
+   - theUrl|lower != 'false'  
+   - theString|lower != 'donotcheck'
+  failed_when: 
+   - "theString not in check4.content"
+  tags: 
+   - url
+   - ustring
+
+- name: Print output of URL and string check
+  debug: var=check4
+  when: 
+   - debugMe|lower == 'true'
+   - theUrl|lower != 'false'  
+   - theString|lower != 'donotcheck'
+  tags: 
+   - url
+   - ustring
+

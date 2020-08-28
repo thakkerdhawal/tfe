@@ -1,0 +1,19 @@
+## DES Tooling Runtime Accounts Rules
+ec2-user        ALL=(ALL) NOPASSWD:       ALL
+e0000010        ALL=(ALL) NOPASSWD:       ALL
+e0000007        ALL=(root) NOPASSWD:      /sbin/service ssg start, /sbin/service ssg stop, /sbin/service ssg restart,\
+                                          /sbin/service mysqld start, /sbin/service mysqld stop, /sbin/service mysqld restart,\
+                                          /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl
+
+User_Alias      DES_USERS=%e0000000
+Cmnd_Alias      DES_READ=/bin/cat /opt/app/ecomm/*, !/bin/cat /opt/app/ecomm/*..*, !/bin/cat /opt/app/ecomm/*\ *,\
+                         /bin/cat /var/log/*, !/bin/cat /var/log/*..*, !/bin/cat /var/log/*\ *,\
+                         /bin/cat /etc/*, !/bin/cat /etc/*..*, !/bin/cat /etc/*\ *,\
+                         /bin/cat /proc/*, !/bin/cat /proc/*..*, !/bin/cat /proc/*\ *
+Cmnd_Alias      DES_USRBIN=/usr/bin/crontab -l, /usr/bin/df, /usr/bin/du, /bin/ls, /usr/bin/netstat, /usr/bin/pstree,\
+                           /usr/bin/pwdx, /usr/bin/chronyc sourcestats, /usr/bin/chronyc tracking, /usr/bin/chronyc sources
+Cmnd_Alias      DES_SBIN=/sbin/ethtool eth[0-9], /sbin/ethtool eth[0-9][0-9], /sbin/fdisk -l, /sbin/swapon -s, /sbin/aide --check
+Cmnd_Alias      DES_USRSBIN=/usr/sbin/df, /usr/sbin/dmidecode, /usr/sbin/dmesg, /usr/sbin/ifconfig -a, /usr/sbin/lsattr, /usr/sbin/lsof,\
+                            /usr/sbin/lvdisplay, /usr/sbin/vgdisplay, /usr/sbin/fuser -[!k]*, /usr/sbin/mtr, /usr/sbin/restorecon
+
+DES_USERS       ALL=(root) NOPASSWD: DES_READ, DES_USRBIN, DES_SBIN, DES_USRSBIN

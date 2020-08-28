@@ -1,0 +1,135 @@
+---
+# tasks file for Splunk Configuration
+- name: transfer configuration files
+  notify: restart splunk
+  copy:
+    src: "{{ playbook_dir }}/files/etc"
+    dest: "{{ splunkHome }}"
+   
+- name: Enable Web Port with SSL
+  ini_file:
+    dest: "{{ splunkHome }}/etc/system/local/web.conf"
+    section: settings
+    option: "{{ item.opt }}"
+    value: "{{ item.val }}"
+  with_items:
+    - { opt: "enableSplunkWebSSL", val: "True" }
+    - { opt: "httpport", val: "{{ splunkHttpPort }}" }
+  notify: restart splunk
+  when:
+    - enableWebGui | bool
+
+- name: deploy customised certificate
+  copy:
+    content: "{{ splunkCert }}"
+    dest: "{{ splunkCertPath }}"
+ 
+- name: use Customised Certificate for Web SSL
+  ini_file:
+    dest: "{{ splunkHome }}/etc/system/local/web.conf"
+    section: settings
+    option: "{{ item.opt }}"
+    value: "{{ item.val }}"
+  with_items:
+    - { opt: "privKeyPath", val: "{{ splunkCertPath }}" }
+    - { opt: "serverCert", val: "{{ splunkCertPath }}" }
+    - { opt: "sslPassword", val: "{{ splunkCertPassword }}" }
+  notify: restart splunk
+  no_log: true
+  when: enableWebGui | bool
+
+- name: "Enable Mgmt Port with SSL"
+  ini_file:
+    dest: "{{ splunkHome }}/etc/system/local/server.conf"
+    section: sslConfig
+    option: "{{ item.opt }}"
+    value: "{{ item.val }}"
+  with_items:
+    - { opt: "serverCert", val: "{{ splunkCertPath }}" }
+    - { opt: "sslRootCAPath", val: "{{ splunkCACertPath }}" }
+    - { opt: "sslPassword", val: "{{ splunkCertPassword }}" }
+  notify: restart splunk
+  no_log: true
+
+- name: "Enable Listener Port"
+  ini_file:
+    dest: "{{ splunkHome }}/etc/system/local/inputs.conf"
+    section: "splunktcp-ssl:9999"
+    option: "{{ item.opt }}"
+    value: "{{ item.val }}"
+  with_items:
+    - { opt: "listenOnIPv6", val: "no" }
+  notify: restart splunk
+  when:
+    - splunkRole == 'splunk_web'
+
+- name: "Enable SSL on Input Port"
+  ini_file:
+    dest: "{{ splunkHome }}/etc/system/local/inputs.conf"
+    section: SSL
+    option: "{{ item.opt }}"
+    value: "{{ item.val }}"
+  with_items:
+    - { opt: "serverCert", val: "{{ splunkCertPath }}" }
+    - { opt: "sslRootCAPath", val: "{{ splunkCACertPath }}" }
+    - { opt: "sslPassword", val: "{{ splunkCertPassword }}" }
+    - { opt: "sslCommonNameToCheck", val: "{{ splunkCertNameToCheck }}" }
+  notify: restart splunk
+  no_log: true
+  when: splunkRole == 'splunk_web'
+
+- name: "Enable Output Port"
+  ini_file:
+    dest: "{{ splunkHome }}/etc/system/local/outputs.conf"
+    section: "tcpout:default"
+    option: "{{ item.opt }}"
+    value: "{{ item.val }}"
+  with_items:
+    - { opt: "server", val: "{{ splunkOutputServers }}" }
+  notify: restart splunk
+  when: splunkRole == 'splunk_fwd'
+
+# This needs to be disabled as the on-prem Splunk instances are on old version
+- name: "Disable telemetry data"
+  ini_file:
+    dest: "{{ splunkHome }}/etc/system/local/outputs.conf"
+    section: "tcpout"
+    option: "{{ item.opt }}"
+    value: "{{ item.val }}"
+  with_items:
+    - { opt: "indexAndForward", val: "false" }
+    - { opt: "forwardedindex.0.whitelist", val: ".*" }
+    - { opt: "forwardedindex.1.blacklist", val: "_.*" }
+    - { opt: "forwardedindex.2.whitelist", val: "(_audit|_internal|_introspection)" }
+  notify: restart splunk
+  when: splunkRole == 'splunk_fwd'
+
+- name: "Enable SSL on Output Port"
+  ini_file:
+    dest: "{{ splunkHome }}/etc/system/local/outputs.conf"
+    section: "tcpout:default"
+    option: "{{ item.opt }}"
+    value: "{{ item.val }}"
+  with_items:
+    - { opt: "clientCert", val: "{{ splunkCertPath }}" }
+    - { opt: "sslPassword", val: "{{ splunkCertPassword }}" }
+    - { opt: "sslRootCAPath", val: "{{ splunkCACertPath }}" }
+    - { opt: "sslCommonNameToCheck", val: "{{ splunkCertNameToCheck }}" }
+    - { opt: "useClientSSLCompression", val: "true" }
+    - { opt: "sslVerifyServerCert", val: "true" }
+  notify: restart splunk
+  no_log: true
+  when: splunkRole == 'splunk_fwd'
+
+- name: "Gather EC2 metadata"
+  ec2_metadata_facts:
+  when: splunkRole == 'splunk_fwd'
+
+- name: "Create AWS S3 logging input"
+  template:
+    src: "{{ playbook_dir }}/templates/inputs.j2"
+    dest: "{{ splunkHome }}/etc/apps/Splunk_TA_aws/local/inputs.conf"
+  notify: restart splunk
+  when: splunkRole == 'splunk_fwd'
+
+

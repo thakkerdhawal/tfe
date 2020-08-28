@@ -1,0 +1,13 @@
+---
+### Demon Playbook for master README.md documentation
+
+- hosts: all
+  gather_facts: false
+  tasks:
+  - name: Run setup module to gather OS facts
+    setup:
+    register: itsFacts
+
+
+  - name: Print out everything that was registered as the itsFacts variable in the previous task using debug
+    debug: var=itsFacts

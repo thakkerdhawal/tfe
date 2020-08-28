@@ -1,0 +1,206 @@
+######### Play 1 #########
+
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  environment:
+   no_proxy: artifactory-1.dts.fm.rbsgrp.net,ecomm.fm.rbsgrp.net
+  roles:
+   - role: ../../roles/generic_addHosts
+     vars:
+      consulKeyPath: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/{{ awsEnv | lower | mandatory }}/terraform/core/outputs/cleo/{{ awsRegion | lower | mandatory }}/vlproxy_ingress_private_ips?raw"
+      groupName: vlproxy
+     tags:
+      - prereq
+      - outputs
+
+######### Play 2 #########            
+- hosts: vlproxy
+  remote_user: "{{ sshUser }}"
+  become_user: "{{ theUser }}"
+  become: true
+  gather_facts: true
+  environment:
+   no_proxy: artifactory-1.dts.fm.rbsgrp.net,ecomm.fm.rbsgrp.net
+  vars: 
+   vlproxyEnv: "{{ awsEnv }}" #by default, set to the value of awsEnv. We can pass a custom value for vlproxyEnv via extra vars for testing purposes if required.
+  vars_files:
+   - ../../vars_files/vlproxy
+  tasks:
+
+  - name: Identify if vlproxy has already been installed and configured by existence of VLProxy.properties binary file
+    stat: path=/opt/app/ecomm/VLProxy/conf/VLProxy.properties 
+    register: vlProxyPropsFile
+    tags:
+     - prereq
+     - outputs
+  
+# obtain vlproxy serial numbers from consul
+  - name: "obtain vlproxy serial numbers instances in Consul"
+    become: false
+    delegate_to: localhost
+    uri:
+      url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/{{ awsEnv | lower | mandatory }}/variables/core/common/vlproxy_serials?raw"
+      headers:
+        X-Consul-Token: "{{ consulTokenPassword }}"
+      return_content: true
+      validate_certs: no
+    register: vlProxySerials
+    tags:
+     - prereq
+     - outputs    
+
+  - name: Set vlproxySerialNumbers to the value of vlProxySerials.content
+    set_fact: vlproxySerialNumbers="{{ vlProxySerials.content }}"
+    when: vlProxySerials != ''
+    tags:
+     - prereq
+     - outputs
+
+#obtain vlproxy default password from consul - only when this is the first time install
+  - name: "obtain vlproxy default password in Consul if this is a first time installation"
+    become: false
+    delegate_to: localhost
+    uri:
+      url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/lab/variables/core/common/vlproxy_default_password?raw"
+      headers:
+        X-Consul-Token: "{{ consulTokenPassword }}"
+      return_content: true
+      validate_certs: no
+    register: vlProxyDefPass
+    when: vlProxyPropsFile.stat.exists == false #condition check for if vlproxy already installed
+    tags:
+     - prereq
+     - outputs
+
+  - name: First-time install - set vlproxyDefaultPassword to the value of vlProxyDefPass.content
+    set_fact: vlproxyDefaultPassword="{{ vlProxyDefPass.content }}"
+    when: 
+     - vlProxyDefPass != ''
+     - vlProxyPropsFile.stat.exists == false
+    tags:
+     - prereq
+     - outputs
+
+  - name: Non first-time install - Set vlproxyDefaultPassword to the value of vlproxyConfigPassword
+    set_fact: vlproxyDefaultPassword="{{ vlproxyConfigPassword }}"
+    when: 
+     - vlProxyPropsFile.stat.exists == true
+    tags:
+     - prereq
+     - outputs
+
+#already idempotent
+  - name: Ensure unzip package installed  and any other required packages
+    package: name="{{ item }}" state=present
+    with_items:
+     - unzip
+    tags: 
+     - prereq
+     - pkgs
+
+#already idempotent
+  - name: "Create {{ vlproxyHome }} directory for Cleo VLProxy and set expected permissions"
+    file: path="{{ vlproxyHome }}" state=directory owner="{{ theUser }}" group="{{ theUser }}" mode=0755 
+    tags:
+     - prereq
+     - dir
+
+#identify if vlproxy already installed etc
+  - name: "Obtain VLProxy Binary from AF and copy it to target server in {{ destFilePath }}"
+    include_role:
+     name: ../../roles/generic_afServerFileCopy
+    tags: 
+     - role
+
+#already idempotent
+  - name: Copy over template installation file and set parameters based on vars
+    template: src="{{ playbook_dir }}/files/vlproxyInstall.properties.j2" dest="{{ vlproxyHome }}/vlproxyInstall.properties" owner="{{ theUser }}" group="{{ theUser }}" mode=0644
+    tags:
+     - prereq
+     - installProperties 
+
+  - name: Create tmp location at /opt/app/ecomm/VLProxy/installTmp for the install
+    file: path="{{ vlproxyHome }}/installTmp" state=directory owner="{{ theUser }}" group="{{ theUser }}" mode=0775
+    tags:
+     - prereq
+     - tmpdir
+
+#Use creates statement here
+  - name: First-time run - perform silent installation of vlproxy
+    shell: "{{ vlproxyHome }}/VLProxy.bin -f {{ vlproxyHome}}/vlproxyInstall.properties"
+    args:
+     creates: "{{ item }}"
+    environment:
+     IATEMPDIR: "{{ vlproxyHome }}/installTmp/"
+    with_items:
+     - /opt/app/ecomm/VLProxy/VLProxyc.lax
+     - /opt/app/ecomm/VLProxy/VLProxyc
+     - /opt/app/ecomm/VLProxy/VLProxyd
+     - /opt/app/ecomm/VLProxy/jre/bin/java
+    tags:
+     - install
+
+#already idempotent
+  - name: Copy VLProxy Template File ready for VLProxy configuration
+    template: src="{{ playbook_dir }}/files/vlproxyConfigure.properties.j2" dest="{{ vlproxyHome }}/vlproxyConfigure.properties" owner="{{ theUser }}" group="{{ theUser }}" mode=0644
+    tags:
+     - prereq
+     - configProperties 
+
+  - name: Check vlproxy systemctl unit file exists
+    stat: path=/usr/lib/systemd/system/vlproxyd.service
+    register: unitFile
+    failed_when: unitFile.stat.exists == false
+    tags: 
+     - services
+
+  - name: Stop VLProxy Service via shell sudo command
+    shell: sudo systemctl stop vlproxyd.service
+    when: unitFile.stat.exists
+    tags:
+     - services
+
+  - name: Perform silent post-install configuration of vlproxy
+    shell: "{{ vlproxyHome }}/VLProxyc -p <{{ vlproxyHome }}/vlproxyConfigure.properties"
+    environment:
+     IATEMPDIR: "{{ vlproxyHome }}/installTmp/"
+    tags:
+     - configure
+
+  - name: Clean up directories and files that are no longer required
+    file: path="{{ item }}" state=absent force=yes
+    with_items:
+     - "{{ vlproxyHome }}/vlproxyInstall.properties"
+     - "{{ vlproxyHome }}/vlproxyConfigure.properties"
+     - "{{ vlproxyHome }}/installTmp"
+    tags:
+     - cleanup
+
+  - name: Enable VLProxy Service via shell sudo command
+    shell: sudo systemctl enable vlproxyd.service
+    when: unitFile.stat.exists
+    tags:
+     - services
+
+  - name: Start VLProxy Service via shell sudo command
+    shell: sudo systemctl start vlproxyd.service
+    when: unitFile.stat.exists
+    tags:
+     - services
+
+  - name: Configure Cloud Watch Agent for VLProxy
+    include_role:
+     name: ../../roles/generic_cwagent
+    tags:
+     - cwagent
+
+  - name: Print IP Address of VLProxy
+    debug: msg="The IP Address of this VLProxy Host to be added to Harmony by the Cleo App Team is {{ ansible_eth0.ipv4.address }}"
+
+  - name: Wait for 60 seconds and then test VLProxy listening on port 8080 (it can take upto 5 minutes)
+    wait_for:
+     port: 8080
+     delay: 60
+     timeout: 300
+

@@ -1,0 +1,107 @@
+[
+        {
+                "flags": 0,
+                "key": "application/nwm/prod/variables/shared-services/common/",
+                "value": ""
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/prod/variables/shared-services/common/bastion_inbound_cidr",
+                "value": "11.191.98.122/32,11.160.95.19/32,11.182.229.139/32,11.182.229.140/32"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/prod/variables/shared-services/common/bastion_instance_count",
+                "value": "1"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/prod/variables/shared-services/common/bastion_instance_type",
+                "value": "t3.small"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/prod/variables/shared-services/common/costcenter",
+                "value": "420"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/prod/variables/shared-services/common/dns_zone",
+                "value": "ss.desosstandard.com"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/prod/variables/shared-services/common/des_rhel7_ami_version_filter",
+                "value": "v1.0.6-b1559739860"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/prod/variables/shared-services/common/blackduck_dns",
+                "value": "blackduck"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/prod/variables/shared-services/common/blackduck_rds_instance_type",
+                "value": "db.m4.xlarge"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/prod/variables/shared-services/common/blackduck_instance_type",
+                "value": "m4.xlarge"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/prod/variables/shared-services/common/blackduck_rootsize",
+                "value": "108"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/prod/variables/shared-services/common/blackduck_public_allowed_cidrs",
+                "value": "147.114.44.0/24,34.255.147.32/32,155.136.158.0/26,155.136.184.24/29"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/prod/variables/shared-services/common/logging_instance_type",
+                "value": "t2.large"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/prod/variables/shared-services/common/logging_cert_domain",
+                "value": "N/A"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/prod/variables/shared-services/common/rbs_lanproxy_cidrs",
+                "value": "11.160.88.126/32,11.191.99.205/32,11.160.91.201/32,11.191.100.206/32"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/prod/variables/shared-services/common/cto_subnet",
+                "value": "10.211.192.0/23"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/prod/variables/shared-services/common/dx_authkey",
+                "value": "8DrgYcCwTHBXwg7x"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/prod/variables/shared-services/common/dx_aws_asn",
+                "value": "64669"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/prod/variables/shared-services/common/dx_bgp_asn",
+                "value": "64588,64590"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/prod/variables/shared-services/common/netcool_ip",
+                "value": "11.161.26.182/32"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/prod/variables/shared-services/common/shield_notification_email",
+                "value": "warwick.mitchell@rbs.com,terry.smith@rbs.com"
+        }
+]

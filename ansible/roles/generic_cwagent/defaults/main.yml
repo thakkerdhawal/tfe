@@ -1,0 +1,3 @@
+cwagentHome : /opt/aws/amazon-cloudwatch-agent/etc
+update_cwagent_logs: "True"
+update_cwagent_metrics: "True"

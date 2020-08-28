@@ -1,0 +1,104 @@
+# Sample playbook to demonstrate how you can query instances in AWS with Ansible
+ - hosts: localhost
+   connection: local
+   gather_facts: False
+   tasks: 
+    - name: Block to list all EC2 instances in a given region
+      block:
+       - name: List all EC2 instances in a region
+         ec2_instance_facts:
+          profile: "{{ awsProfile }}"
+          region: "{{ awsRegion }}"
+         register: instanceFacts
+
+       - name: Take instanceFacts content and extract the private_ip_address attribute and store this as a list called privIps
+         set_fact: 
+          privIps: "{{ instanceFacts.instances | map(attribute='private_ip_address') | list }}"
+   
+       - name: print the list of Ips (whats stored in privIps)
+         debug: var=privIps
+   
+       - name: print the list of Ips with a static message before each ip
+         debug: msg="Host is {{ item }}"
+         with_items: "{{ privIps }}"
+      when:
+       - consulTokenPassword is not defined
+       - ec2Name is not defined
+       - ec2Id is not defined
+
+    - name: Block to list all EC2 instances that match a tag filter
+      block:
+       - name: Get EC2 instance facts based on a tag Name filter and store the output as a var instanceFacts (dictionary format)
+         ec2_instance_facts:
+          profile: "{{ awsProfile }}"
+          region: "{{ awsRegion }}"
+          filters:
+           "tag:Name": "{{ ec2Name }}"
+         register: instanceFacts
+   
+       - name: Take instanceFacts content and extract the private_ip_address attribute and store this as a list called privIps
+         set_fact: 
+          privIps: "{{ instanceFacts.instances | map(attribute='private_ip_address') | list }}"
+   
+       - name: print the list of Ips (whats stored in privIps)
+         debug: var=privIps
+   
+       - name: print the list of Ips with a static message before each ip
+         debug: msg="Host is {{ item }}"
+         with_items: "{{ privIps }}"
+      when: 
+       - ec2Name is defined
+  
+    - name: Block to list EC2 instance info based on Consul IP Address
+      block:
+       - name: Get EC2 IP Address from Consul
+         include_role: 
+          name: generic_addHosts
+         vars: 
+          consulKeyPath: "{{ consulUrl }}"
+          groupName: test
+   
+       - name: Get EC2 instance facts based on IP address obtained from Consul
+         ec2_instance_facts:
+          profile: "{{ awsProfile }}"
+          region: "{{ awsRegion }}"
+          filters:
+           private-ip-address: "{{ item }}"
+         register: instanceFacts
+         with_items: 
+          - "{{ groups.test }}"
+ 
+       - name: Take instanceFacts content and extract the private_dns_name attribute and store this as a list called privDns
+         set_fact: 
+          privDns: "{{ instanceFacts.results.0.instances| map(attribute='private_dns_name') | list }}" 
+   
+       - name: print the list of Ips (whats stored in privDns)
+         debug: var=privDns
+
+       - name: print the DNS address with a static message
+         debug: msg="Host is {{ item }}"
+         with_items: "{{ privDns }}"
+      when: 
+       - consulTokenPassword is defined   
+    
+    - name: Block to list EC2 instance based on instance ID
+      block:
+       - name: Get EC2 instance facts based on Instance ID 
+         ec2_instance_facts:
+          profile: "{{ awsProfile }}"
+          region: "{{ awsRegion }}"
+          instance_ids: "{{ ec2Id }}"
+         register: instanceFacts
+               
+       - name: Take instanceFacts content and extract the private_ip_address attribute and store this as a list called privIps
+         set_fact: 
+          privIps: "{{ instanceFacts.instances | map(attribute='private_ip_address') | list }}"
+   
+       - name: print the list of Ips (whats stored in privIps)
+         debug: var=privIps
+   
+       - name: print the list of Ips with a static message before each ip
+         debug: msg="Host is {{ item }}"
+         with_items: "{{ privIps }}"
+         
+      when: ec2Id is defined   

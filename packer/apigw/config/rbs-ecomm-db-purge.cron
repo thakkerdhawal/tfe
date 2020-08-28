@@ -1,0 +1,2 @@
+# Purge all non-severe audit records over 3 weeks old
+0 0 * * * root /usr/local/bin/audit_purge.sh -p

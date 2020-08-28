@@ -1,0 +1,14 @@
+Host shared-services-lab-bastion
+     HostName                 10.8.102.18
+     User                     ec2-user
+     StrictHostKeyChecking    no
+     ProxyCommand             none
+     CheckHostIP              no
+     ForwardAgent             yes
+     ServerAliveInterval      60
+     IdentityFile             ~/.ssh/shared-services-lab.pem
+Host 10.8.*
+     ProxyJump                shared-services-lab-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             ~/.ssh/shared-services-lab.pem

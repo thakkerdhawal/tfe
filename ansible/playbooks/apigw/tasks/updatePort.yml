@@ -1,0 +1,28 @@
+#
+# Upodate Listener Port
+#
+# Input vars:
+# - apigwMgmtEndpoint
+# - apigwUser
+# - apigwPassword
+# - portPayload
+# - portId
+#
+# Output vars:
+# - apigw_response_update_port
+#
+- name: "update existing listen port"
+  uri:
+    url: "{{ apigwMgmtEndpoint }}/restman/1.0/listenPorts/{{ portId }}"
+    method: PUT
+    force_basic_auth: yes
+    user: '{{ apigwUser }}'
+    password: '{{ apigwPassword }}'
+    headers:
+      Content-Type: 'application/xml'
+    body: "{{ portPayload }}"
+    validate_certs: no
+    status_code: 200
+    return_content: yes
+  register: apigw_response_update_port
+  changed_when: apigw_response_update_port is succeeded

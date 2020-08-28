@@ -1,0 +1,30 @@
+Lab Environments:
+
+1)	terraform-application-nwm-lab
+
+    ADD:
+    key "APPLICATION/NWM/" { policy = "read" }
+    key "APPLICATION/NWM/LAB/TERRAFORM/CORE/" { policy = "write" }
+    session "APPLICATION/NWM/LAB/TERRAFORM/CORE/" { policy = "write" }
+    agent "" { policy = "read" }
+
+2)	terraform-application-nwm-lab-variables
+    
+
+    ADD:
+    key "APPLICATION/NWM/LAB/VARIABLES/CORE/" { policy = "write" }
+
+3)	terraform-application-sharedservices-lab
+
+
+    ADD:
+    key "APPLICATION/NWM/" { policy = "read" }
+    key "APPLICATION/NWM/LAB/TERRAFORM/SHARED-SERVICES/" { policy = "write" }
+    session "APPLICATION/NWM/LAB/TERRAFORM/SHARED-SERVICES/" { policy = "write" }
+    agent "" { policy = "read" }
+
+
+4)	terraform-application-sharedservices-lab-variables
+   
+    ADD:
+    key "APPLICATION/NWM/LAB/VARIABLES/SHARED-SERVICES/" { policy = "write" }

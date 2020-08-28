@@ -1,0 +1,52 @@
+[
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/shared-services/eu-west-1/",
+                "value": ""
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/shared-services/eu-west-1/az_number",
+                "value": "3"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/shared-services/eu-west-1/dx_amazonaddress",
+                "value": "11.211.3.146/30"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/shared-services/eu-west-1/dx_connectionid",
+                "value": "dxcon-fgkb41fb" 
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/shared-services/eu-west-1/dx_customeraddress",
+                "value": "11.211.3.145/30"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/shared-services/eu-west-1/dx_vlan",
+                "value": "311"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/shared-services/eu-west-1/intra_subnets",
+                "value": "10.8.110.0/27,10.8.110.32/27,10.8.110.64/27"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/shared-services/eu-west-1/public_subnets",
+                "value": "10.8.111.0/27,10.8.111.32/27,10.8.111.64/27"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/shared-services/eu-west-1/private_subnets",
+                "value": "10.8.110.96/28,10.8.110.112/28"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/cicd/variables/shared-services/eu-west-1/vpc_cidr",
+                "value": "10.8.110.0/23"
+        }
+]

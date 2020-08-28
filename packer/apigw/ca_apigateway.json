@@ -1,0 +1,135 @@
+{
+  "variables": {
+    "instance_type": "m4.large",
+    "region": "eu-west-1",
+    "ami_name": "des-ca-apigw-ami",
+    "ami_description": "DES Customised CA API Gateway",
+    "ami_version": "1.0.3",
+    "vault_ca_url": "https://vault-mm.web.rbsgrp.net/v1/ssh/ssh-client-signer/public_key",
+    "gateway_version": "9.3",
+    "ca_aws_account": "192443709020",
+    "patch_bucket": "nwm-ca-apigw-patches",
+    "subnet_filter": "lab-vpc-intra-*",
+    "sg_filter": "lab-amicreate-sg",
+    "instance_profile": "packer-apigw-instance-profile",
+    "aws_profile": null,
+    "platform_patch":null,
+    "software_patch":null,
+    "bastion_host": null,
+    "ssh_key_file": null
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "profile": "{{ user `aws_profile` }}",
+    "region": "{{ user `region` }}",
+    "instance_type": "{{ user `instance_type` }}",
+    "associate_public_ip_address": false,
+    "security_group_id": "{{ user `security_group_id` }}",
+    "iam_instance_profile": "{{ user `instance_profile` }}",
+    "ami_name": "{{ user `ami_name` }}-v{{ user `ami_version` }}-b{{ timestamp }}",
+    "ami_description": "{{user `ami_description`}} {{user `gateway_version`}} - {{isotime \"Jan 02 2006 15:04:05\"}}",
+    "subnet_filter": {
+      "filters": {
+        "tag:Name": "{{ user `subnet_filter` }}"
+      },
+      "most_free": true,
+      "random": false
+    },
+    "security_group_filter": {
+      "filters": {
+        "tag:Name": "{{ user `sg_filter` }}"
+      }
+    },
+    "source_ami_filter": {
+	  "filters": {
+	    "virtualization-type": "hvm",
+      "name": "gateway-{{ user `gateway_version` }}*-ami-rhel-x86_64",
+	    "root-device-type": "ebs"
+	  },
+	"owners": ["{{ user `ca_aws_account` }}"],
+	"most_recent": true
+    },
+    "encrypt_boot": true,
+    "launch_block_device_mappings": [{
+      "volume_type": "gp2",
+      "device_name": "/dev/sda1",
+      "delete_on_termination": true
+    }],
+    "communicator": "ssh",
+    "ssh_username" : "root",
+    "ssh_timeout": "20m",
+    "ssh_pty": "true",
+    "ssh_bastion_host": "{{user `bastion_host`}}",
+    "ssh_bastion_port": 22,
+    "ssh_bastion_username": "ec2-user",
+    "ssh_bastion_private_key_file": "{{user `ssh_key_file`}}",
+    "tags": {
+      "Name": "{{ user `ami_name` }}",
+      "Gateway Version": "{{ user `gateway_version` }}",
+      "Version": "v{{user `ami_version`}}-b{{timestamp}}",
+      "Source-ami-uuid": "{{ uuid }}",
+      "APIGW-Patch" : "{{ user `platform_patch` }} | {{ user `software_patch` }}"
+    }
+  }],
+  "provisioners": [ 
+    {
+      "type": "shell",
+      "pause_before": "30s",
+      "expect_disconnect": true,
+      "environment_vars": [
+        "PATCH={{ user `platform_patch` }}",
+        "S3BUCKET={{ user `patch_bucket` }}"
+      ],
+      "script": "./scripts/patching.sh",
+      "remote_folder": "/home/ssgconfig"
+    },
+    {
+      "type": "shell",
+      "pause_before": "120s",
+      "expect_disconnect": true,
+      "environment_vars": [
+        "PATCH={{ user `software_patch` }}",
+        "S3BUCKET={{ user `patch_bucket` }}"
+      ],
+      "script": "./scripts/patching.sh",
+      "remote_folder": "/home/ssgconfig"
+    },
+    {
+      "pause_before": "120s",
+      "type": "file",
+      "source": "config",
+      "destination": "/root"
+    },
+    {
+      "type": "shell-local",
+      "command": "curl -sk -o ./vault-trusted-user-ca-key.pem {{user `vault_ca_url`}}"
+    },
+    {
+      "type": "file",
+      "generated": true,
+      "source": "./vault-trusted-user-ca-key.pem",
+      "destination": "/etc/ssh/vault-trusted-user-ca-key.pem"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "chmod 640 /etc/ssh/vault-trusted-user-ca-key.pem"
+      ]
+    },
+    {
+      "type": "shell-local",
+      "command": "rm -f ./vault-trusted-user-ca-key.pem"
+    },
+    {
+      "type": "shell",
+      "pause_before": "30s",
+      "expect_disconnect": false,
+      "environment_vars": [
+        "S3BUCKET={{ user `patch_bucket` }}",
+        "VERBOSE=true"
+      ],
+      "script": "./scripts/build.sh",
+      "remote_folder": "/root"
+    }
+  ]
+}

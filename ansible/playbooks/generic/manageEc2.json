@@ -1,0 +1,56 @@
+[
+      {
+        "index": 0,
+        "max": 30,
+        "min": 1,
+        "questionName": "awsEnv",
+        "required": true,
+        "type": "text",
+        "variable": "awsEnv"
+      },
+      {
+        "index": 1,
+        "max": 30,
+        "min": 1,
+        "questionName": "awsRegion",
+        "required": true,
+        "type": "text",
+        "variable": "awsRegion"
+      },
+      {
+        "index": 2,
+        "max": 100,
+        "min": 1,
+        "questionName": "ec2Name",
+        "required": true,
+        "type": "text",
+        "variable": "ec2Name"
+      },
+      {
+        "index": 3,
+        "max": 30,
+        "min": 1,
+        "questionName": "ec2State",
+        "required": true,
+        "type": "text",
+        "variable": "ec2State"
+      },
+      {
+        "index": 4,
+        "max": 10,
+        "min": 1,
+        "questionName": "tooling",
+        "required": true,
+        "type": "text",
+        "variable": "tooling"
+      },
+      {
+        "index": 5,
+        "max": 30,
+        "min": 1,
+        "questionName": "awsProfile",
+        "required": false,
+        "type": "text",
+        "variable": "awsProfile"
+      }
+]

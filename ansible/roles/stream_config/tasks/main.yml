@@ -1,0 +1,108 @@
+---
+- name: Create destination directories for java and stream binaries
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+    owner: "{{ streamUser }}"
+    group: e0000000
+  with_items:
+    - "{{ javaDest }}"
+    - "{{ streamDest }}"
+- name: Copy java binary package
+  include_role:
+    name: generic_afServerFileCopy
+  vars:
+    afUrl: "{{ afBase }}/Oracle/Java/jdk{{ javaVersion }}_64bit/Java-jdk{{ javaVersion }}_64bit-linux.tgz"
+    destFilePath: "{{ javaDest }}"
+    unarchive: true
+    theUser: "{{ streamUser }}"
+    theGroup: e0000000
+- name: Copy liberator binary package
+  include_role:
+    name: generic_afServerFileCopy
+  vars:
+    afUrl: "{{ afBase }}/Caplin/Liberator/{{ streamVersion }}/CaplinLiberator-{{ streamVersion }}.tgz"
+    destFilePath: "{{ streamDest }}"
+    unarchive: true
+    theUser: "{{ streamUser }}"
+    theGroup: e0000000
+- name: "Copy Stream config directory"
+  copy:
+    src: "{{ playbook_dir }}/files/{{ awsEnv }}/"
+    dest: "{{ streamDest }}"
+    mode: 0644
+    owner: "{{ streamUser }}"
+    group: e0000000
+  notify: restart stream
+
+- name: "Copy templated config files"
+  template:
+    src: "{{ playbook_dir }}/templates/{{ awsEnv }}/{{ item }}"
+    dest: "{{ streamDest }}{{ item }}"
+    mode: 0644
+    owner: "{{ streamUser }}"
+    group: e0000000
+  with_items:
+    - etc/topicenabler.conf
+    - etc/java.conf
+    - etc/rttpd-infra.conf
+    - htdocs/status/liberator-status.js
+  notify: restart stream
+
+- name: Enable stream
+  command: "sudo systemctl enable stream-agilemarkets.service"
+
+- name: "Check if cert key has already been generated"
+  stat:
+    path: "{{ streamDest }}etc/certs/rttpd.key"
+  register: keyExists
+
+- name: "Create new self signed Certificate and Key"
+  block:
+    - name: "Ensure cert directory exists"
+      file:
+        path: "{{ streamDest }}etc/certs/"
+        state: directory
+        mode: 0755
+        owner: "{{ streamUser }}"
+        group: e0000000
+    - name: "Generate random passphrase for self signed certificate"
+      copy:
+        content: "{{ lookup('password', '/dev/null') }}"
+        dest: "{{ streamDest}}etc/certs/rttpd.pwd"
+        mode: 0600
+        owner: "{{ streamUser }}"
+        group: e0000000
+    - name: "Generate RSA key"
+      command: openssl genrsa -aes128 -passout file:{{ streamDest}}etc/certs/rttpd.pwd -out {{ streamDest }}etc/certs/rttpd.key 4096
+    - name: "Generate self signed certificate"
+      command: openssl req -x509 -nodes -subj '/CN=Caplin' -days 1825 -sha256 -key {{ streamDest }}etc/certs/rttpd.key -passin file:{{ streamDest}}etc/certs/rttpd.pwd -out {{ streamDest }}etc/certs/rttpd.pem 
+      notify: restart stream
+  when: keyExists.stat.exists == false
+
+- name: "Create scripts directory"
+  file:
+    path: "{{ streamDest}}scripts/"
+    state: directory
+    mode: 0755
+    owner: "{{ streamUser }}"
+    group: e0000000
+
+- name: "Copy scripts"
+  copy:
+    src: "{{ item }}"
+    dest: "{{ streamDest}}scripts/"
+    mode: 0755
+    owner: "{{ streamUser }}"
+    group: e0000000
+  with_items:
+    - binary-log-shipper.sh
+    - s3-bash4
+
+- name: "Configure cronjob for binary log shipper"
+  cron:
+    name: "binary log shipper"
+    minute: "1"
+    job: "{{ streamDest }}scripts/binary-log-shipper.sh >/dev/null 2>&1"
+

@@ -1,0 +1,35 @@
+---
+ - hosts: "{{ ec2Targets }}"
+   gather_facts: False
+   remote_user: ec2-user
+   become_user: "{{ becomeUser }}"
+   become: true
+   tasks:
+   - name: Gather facts manually via ssh connection and store
+     setup:
+     register: osFacts
+
+   - name: print all gathered instance OS facts
+     debug: var=osFacts
+
+   - name: print all inventory hostvars provided natively through dynamic inventory when verbosity is 2 or more
+     debug: var=hostvars[inventory_hostname] verbosity=2
+
+   - name: Create empty test temporary file in /tmp called testfile1.txt on target hosts
+     tempfile:
+      state: file
+      suffix: temp
+     register: myTempFile
+
+   - name: Print full filename path
+     debug: var=myTempFile.path 
+
+   - name: Remove temp file 
+     file: state=absent path="{{ myTempFile.path }}"
+
+   - name: Get Uptime of targets via shell command
+     shell: "uptime -p"
+     register: theUptime
+
+   - name: Print uptime of targets
+     debug: var=theUptime.stdout_lines

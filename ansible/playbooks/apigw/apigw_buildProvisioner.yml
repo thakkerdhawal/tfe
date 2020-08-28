@@ -1,0 +1,124 @@
+######## Play 1: setup inventory ########
+
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  roles:
+  - role: ../../roles/generic_addHosts
+    vars:
+      consulKeyPath: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/{{ awsEnv | mandatory }}/terraform/core/outputs/agilemarkets/{{ awsRegion | mandatory }}/apigw_instances_private_ip?raw"
+      groupName: apigw
+ 
+######## Play 2: configura API Gateway ########
+- hosts: apigw
+  vars_files:
+  - ../../vars_files/apigw
+  remote_user: "{{ remoteUser }}"
+  become: true
+  gather_facts: yes
+  tasks:
+  - name: "Check build status"
+    block:
+    - name: "Look up build completion marker"
+      stat:
+        path: /root/ready_for_app_deployment
+      register: apigwBuildStatus
+
+  - name: "retrieve variables from Consul"
+    block:
+    - name: "check for consul token"
+      set_fact:
+        consulTokenPassword: "{{ lookup('env','CONSUL_HTTP_TOKEN') }}"
+      when: consulTokenPassword is not defined 
+    - fail:
+        msg: "Valid consul token required in either env var 'CONSUL_HTTP_TOKEN' or as input var 'consulTokenPassword'"
+      when: consulTokenPassword == ""
+    - name: "lookup initial password in Consul"
+      uri:
+        url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/{{ awsEnv | mandatory }}/terraform/core/outputs/agilemarkets/{{ awsRegion | mandatory }}/apigw_initial_password?raw"
+        headers:
+          X-Consul-Token: "{{ consulTokenPassword }}"
+        status_code: 200
+        return_content: true
+      register: consulOutputPassword
+      when: apigwPassword is not defined 
+    - name: "set initial password"
+      set_fact:
+        apigwPassword: "{{ consulOutputPassword.content }}"
+      when: apigwPassword is not defined 
+    - name: "lookup API Gateway policy package name in Consul"
+      uri:
+        url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/{{ awsEnv | mandatory }}/variables/core/common/apigw_rbsagile_bundle?raw"
+        headers:
+          X-Consul-Token: "{{ consulTokenPassword }}"
+        status_code: 200
+        return_content: true
+      register: consulOutputApigwPolicyPackage
+    - name: "set apigwPolicyPackage"
+      set_fact:
+        apigwPolicyPackage: "{{ consulOutputApigwPolicyPackage.content }}"
+    delegate_to: localhost
+    connection: local
+    become: false
+    when: not apigwBuildStatus.stat.exists
+
+  - name: "Prepare build artefacts"
+    block:
+    - name: "Clean up previous deployment"
+      file:
+        path: /opt/SecureSpan/Gateway/node/default/etc/bootstrap
+        state: absent
+    - name: "Create bootstrap folder"
+      file:
+        path: /opt/SecureSpan/Gateway/node/default/etc/bootstrap/bundle
+        state: directory
+        recurse: true
+    - name: "Upload API Gateway base build bundle"
+      copy:
+        src: files/build_bundle
+        dest: /root
+    - name: "Upload API Gateway base build bundle"
+      include_role:
+        name: ../../roles/generic_afServerFileCopy
+      vars:
+        afUrl: "{{ afPath }}/{{ item.file }}"
+        destFilePath: "{{ item.dest }}"
+        unarchive: "{{ item.unarchive }}"
+        theUser: root
+      loop:
+        - { file: "{{ apigwPolicyPackage }}", dest: "/opt/SecureSpan/Gateway/node/default/etc/bootstrap/bundle/{{ apigwPolicyPackage }}", unarchive: False }
+    # TODO: change the bundle package to zip or tar format 
+    - name: "Unpack policy bundle"
+      command: "gunzip /opt/SecureSpan/Gateway/node/default/etc/bootstrap/bundle/{{ apigwPolicyPackage }}"
+    when: not apigwBuildStatus.stat.exists
+
+  - name: "Build API Gateway"
+    block:
+    # TODO: replace the script with Ansible modules
+    - name: "Execute build script"
+      script: "files/build_apigw.sh '{{ apigwPassword }}'"
+      args:
+        creates: /root/ready_for_app_deployment
+      register: executeBuildScript
+    # Note: reboot module not available pre 2.7
+    - name: "Post build reboot"
+      shell: /sbin/shutdown -r now
+      async: 600
+      poll: 30
+      register: postBuildReboot
+    - name: "Wait for Gateway become available after reboot"
+      wait_for:
+        port: 9443
+        delay: 60
+        sleep: 15
+        timeout: 300
+    when: not apigwBuildStatus.stat.exists
+
+  - name: "Post build"
+    block:
+    - name: "Remove uploaded build pack"
+      file:
+        path: /root/build_bundle
+        state: absent
+    - name: "Health Check"
+      include_tasks: tasks/runHealthChecks.yml

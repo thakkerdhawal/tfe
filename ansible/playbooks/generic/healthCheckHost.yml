@@ -1,0 +1,22 @@
+### Sample Playbook to perform healthCheck via SSH on an EC2 instance
+######################################################
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  roles:
+   - role: ../../roles/generic_addHosts
+     vars:
+#     consulKeyPath: #should be provided as an extra var
+      groupName: healthCheck
+     tags:
+      - prereq
+      - outputs
+######################################################
+- hosts: healthCheck
+  gather_facts: true #required when connecting to remote host via ssh
+  remote_user: "{{ theUser | default ('ec2-user') }}"
+  roles:
+    - role: ../../roles/generic_healthCheck
+######################################################
+

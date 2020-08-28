@@ -1,0 +1,15 @@
+Nonprod Environments:
+
+1)	terraform-application-nwm-nonprod
+
+
+    ADD:
+    key "APPLICATION/NWM/" { policy = "read" }
+    key "APPLICATION/NWM/NONPROD/TERRAFORM/CORE/" { policy = "write" }
+    session "APPLICATION/NWM/NONPROD/TERRAFORM/CORE/" { policy = "write" }
+    agent "" { policy = "read" }
+
+2)	terraform-application-nwm-nonprod-variables
+
+    ADD:
+    key "APPLICATION/NWM/NONPROD/VARIABLES/CORE/" { policy = "write" }

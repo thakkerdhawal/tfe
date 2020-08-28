@@ -1,0 +1,4 @@
+---
+# defaults file for stream
+first_run: true
+streamDest: /ecomm/caplin/liberator/stream-agilemarkets/current/

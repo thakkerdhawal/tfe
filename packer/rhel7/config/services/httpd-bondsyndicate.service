@@ -1,0 +1,15 @@
+[Unit]
+Description=APACHE HTTPD Instance: httpd-bondsyndicate
+After=syslog.target network.target
+[Service]
+User=e0000006
+Group=e0000000
+Type=forking
+PIDFile=/opt/app/ecomm/Web/httpd-bondsyndicate/current/httpd/run/httpd.pid
+ExecStart=/opt/app/ecomm/Web/httpd-bondsyndicate/current/httpd/servers/rbs/bin/httpdctl start
+ExecReload=/opt/app/ecomm/Web/httpd-bondsyndicate/current/httpd/servers/rbs/bin/httpdctl reload
+ExecStop=/opt/app/ecomm/Web/httpd-bondsyndicate/current/httpd/servers/rbs/bin/httpdctl stop
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

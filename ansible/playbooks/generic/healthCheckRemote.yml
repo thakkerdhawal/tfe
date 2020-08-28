@@ -1,0 +1,14 @@
+
+### Sample Playbook to perform healthcheck locally on this ansible host and remotely test a URL i.e. a LB URL or port
+# ensure var {{ theHost }} is passed in an extra var in this configuration
+
+######################################################
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks: 
+  - name: include the generic_healthCheck role to test an external NLB
+    include_role:
+     name: ../../roles/generic_healthCheck
+######################################################
+

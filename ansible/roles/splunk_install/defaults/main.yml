@@ -1,0 +1,13 @@
+---
+# defaults file for splunk
+first_run: false
+destDir: /ecomm
+splunkHome: "{{ destDir }}/splunk"
+splunkExec: "{{ splunkHome }}/bin/splunk"
+splunkCertPath: "{{ splunkHome }}/etc/auth/{{ splunkCertFile }}"
+splunkCACertPath: "{{ splunkHome }}/etc/auth/{{ splunkCACertFile }}"
+splunkUser: "{{ theUser }}"
+splunkGroup: "{{ theUser }}"
+enableWebGui: false
+splunkHttpPort: 8443
+splunkMgmtPort: 8089

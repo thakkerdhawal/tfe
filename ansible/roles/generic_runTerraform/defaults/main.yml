@@ -1,0 +1,21 @@
+---
+# defaults file for generic_runTerraform#
+
+## Override These with Extra Vars ##
+tooling: true
+mailMe: false
+tfAction: false
+tfCmd: false
+tfPlan: true
+
+## By Default, Do Not Need To Override These ##
+afUrl: "https://artifactory-1.dts.fm.rbsgrp.net/artifactory/eComm-private-releases-local/Tooling/tfPlugins.tar.gz"
+awsProfile: TOOLING
+awsCredFile: "{{ playbook_dir }}/awsCredentials"
+debugMe: false
+devTfCodeDir: "{{ playbook_dir }}/../../../terraform/{{ awsAccount | lower }}/{{ awsComponent | lower}}"
+devTfPluginsDir: "/usr/local/bin/.terraform/plugins/linux_amd64"
+manualAuth: false
+tfBinary: /usr/local/bin/terraform
+toolingTfCodeDir: "{{ playbook_dir }}/../../../terraform/{{ awsAccount | lower }}/{{ awsComponent | lower}}"
+wsName: "{{ awsEnv|lower }}_{{ awsAccount|lower }}_{{ awsComponent|lower }}_{{ awsRegion|lower }}"

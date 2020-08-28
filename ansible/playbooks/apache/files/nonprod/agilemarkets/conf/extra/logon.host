@@ -1,0 +1,7 @@
+<IfModule proxy_module>
+  ProxyPreserveHost On
+  ProxyPass /logon/ https://11.160.29.86:444/logon/
+  ProxyPassReverse /logon/ https://11.160.29.86:444/logon/
+  ProxyPass /Logon/ https://11.160.29.86:444/logon/
+  ProxyPassReverse /Logon/ https://11.160.29.86:444/logon/
+</IfModule>

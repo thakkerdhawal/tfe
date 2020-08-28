@@ -1,0 +1,26 @@
+#
+# Get service from by service name
+#
+# Input vars:
+# - apigwMgmtEndpoint
+# - apigwUser
+# - apigwPassword
+# - serviceName
+# Output vars:
+# - apigw_response_get_service_by_name
+#
+- name: "lookup target service by name"
+  uri:
+    url: '{{ apigwMgmtEndpoint }}/restman/1.0/services?name={{ serviceName | urlencode }}'
+    method: GET
+    force_basic_auth: yes
+    user: "{{ apigwUser }}"
+    password: "{{ apigwPassword }}"
+    headers:
+      Content-Type: 'application/xml'
+    validate_certs: no
+    # this request always returns 200 even when there is no matching
+    status_code: 200
+    return_content: yes
+  register: apigw_response_get_service_by_name
+

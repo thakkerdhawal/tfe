@@ -1,0 +1,279 @@
+### Lab Env Config ###
+##Lab Bastions
+Host ss-lab-eu-west-1-bastion
+     HostName                 {{ euwest1BastionIps.results.0.content | default('TBC', true) }}
+     StrictHostKeyChecking    no
+     ProxyCommand             none
+     CheckHostIP              no
+     ForwardAgent             yes
+     ServerAliveInterval      60
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+Host ss-lab-eu-west-2-bastion
+     HostName                 {{ euwest2BastionIps.results.0.content | default('TBC', true) }}
+     StrictHostKeyChecking    no
+     ProxyCommand             none
+        CheckHostIP              no
+     ForwardAgent             yes
+     ServerAliveInterval      60
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+##Core Lab EU-West-1 Subnets
+Host {{ coreEuWest1IntraSubs.results.0.content.split('.')[0] }}.{{ coreEuWest1IntraSubs.results.0.content.split('.')[1] }}.{{ coreEuWest1IntraSubs.results.0.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-lab-eu-west-1-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+Host {{ coreEuWest1PublicSubs.results.0.content.split('.')[0] }}.{{ coreEuWest1PublicSubs.results.0.content.split('.')[1] }}.{{ coreEuWest1PublicSubs.results.0.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-lab-eu-west-1-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+##Core Lab EU-West-2 Subnets
+Host {{ coreEuWest2IntraSubs.results.0.content.split('.')[0] }}.{{ coreEuWest2IntraSubs.results.0.content.split('.')[1] }}.{{ coreEuWest2IntraSubs.results.0.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-lab-eu-west-2-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+Host {{ coreEuWest2PublicSubs.results.0.content.split('.')[0] }}.{{ coreEuWest2PublicSubs.results.0.content.split('.')[1] }}.{{ coreEuWest2PublicSubs.results.0.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-lab-eu-west-2-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+##SS Lab EU-West-1 Subnets
+Host {{ ssEuWest1IntraSubs.results.0.content.split('.')[0] }}.{{ ssEuWest1IntraSubs.results.0.content.split('.')[1] }}.{{ ssEuWest1IntraSubs.results.0.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-lab-eu-west-1-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+#Host {{ ssEuWest1PrivateSubs.results.0.content.split('.')[0] }}.{{ ssEuWest1PrivateSubs.results.0.content.split('.')[1] }}.{{ ssEuWest1PrivateSubs.results.0.content.split('.')[2] }}.*
+#     ProxyJump                %r@ss-lab-eu-west-1-bastion
+#     StrictHostKeyChecking    no
+#     user                     ec2-user
+#     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+Host {{ ssEuWest1PublicSubs.results.0.content.split('.')[0] }}.{{ ssEuWest1PublicSubs.results.0.content.split('.')[1] }}.{{ ssEuWest1PublicSubs.results.0.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-lab-eu-west-1-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+##SS Lab EU-West-2 Subnets
+Host {{ ssEuWest2IntraSubs.results.0.content.split('.')[0] }}.{{ ssEuWest2IntraSubs.results.0.content.split('.')[1] }}.{{ ssEuWest2IntraSubs.results.0.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-lab-eu-west-2-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+#Host {{ ssEuWest2PrivateSubs.results.0.content.split('.')[0] }}.{{ ssEuWest2PrivateSubs.results.0.content.split('.')[1] }}.{{ ssEuWest2PrivateSubs.results.0.content.split('.')[2] }}.*
+#     ProxyJump                %r@ss-lab-eu-west-2-bastion
+#     StrictHostKeyChecking    no
+#     user                     ec2-user
+#     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+Host {{ ssEuWest2PublicSubs.results.0.content.split('.')[0] }}.{{ ssEuWest2PublicSubs.results.0.content.split('.')[1] }}.{{ ssEuWest2PublicSubs.results.0.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-lab-eu-west-2-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+
+
+### NonProd Env Config ###
+## Bastions
+# Currently No Non-Prod Shared Services #
+##Core NonProd EU-West-1 Subnets
+Host {{ coreEuWest1IntraSubs.results.1.content.split('.')[0] }}.{{ coreEuWest1IntraSubs.results.1.content.split('.')[1] }}.{{ coreEuWest1IntraSubs.results.1.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-prod-eu-west-1-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+Host {{ coreEuWest1PublicSubs.results.1.content.split('.')[0] }}.{{ coreEuWest1PublicSubs.results.1.content.split('.')[1] }}.{{ coreEuWest1PublicSubs.results.1.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-prod-eu-west-1-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+##Core NonProd EU-West-2 Subnets
+Host {{ coreEuWest2IntraSubs.results.1.content.split('.')[0] }}.{{ coreEuWest2IntraSubs.results.1.content.split('.')[1] }}.{{ coreEuWest2IntraSubs.results.1.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-prod-eu-west-2-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+Host {{ coreEuWest2PublicSubs.results.1.content.split('.')[0] }}.{{ coreEuWest2PublicSubs.results.1.content.split('.')[1] }}.{{ coreEuWest2PublicSubs.results.1.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-prod-eu-west-2-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+
+
+
+### CICD Env Config ###
+##CICD Bastions
+Host ss-cicd-eu-west-1-bastion
+     HostName                 {{ euwest1BastionIps.results.1.content | default('TBC', true) }}
+     StrictHostKeyChecking    no
+     ProxyCommand             none
+     CheckHostIP              no
+     ForwardAgent             yes
+     ServerAliveInterval      60
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+Host ss-cicd-eu-west-2-bastion
+     HostName                 {{ euwest2BastionIps.results.1.content | default('TBC', true) }}
+     StrictHostKeyChecking    no
+     ProxyCommand             none
+     CheckHostIP              no
+     ForwardAgent             yes
+     ServerAliveInterval      60
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+##Core CICD EU-West-1 Subnets
+Host {{ coreEuWest1IntraSubs.results.2.content.split('.')[0] }}.{{ coreEuWest1IntraSubs.results.2.content.split('.')[1] }}.{{ coreEuWest1IntraSubs.results.2.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-cicd-eu-west-1-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+Host {{ coreEuWest1PublicSubs.results.2.content.split('.')[0] }}.{{ coreEuWest1PublicSubs.results.2.content.split('.')[1] }}.{{ coreEuWest1PublicSubs.results.2.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-cicd-eu-west-1-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+##Core CICD EU-West-2 Subnets
+Host {{ coreEuWest2IntraSubs.results.2.content.split('.')[0] }}.{{ coreEuWest2IntraSubs.results.2.content.split('.')[1] }}.{{ coreEuWest2IntraSubs.results.2.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-cicd-eu-west-2-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+Host {{ coreEuWest2PublicSubs.results.2.content.split('.')[0] }}.{{ coreEuWest2PublicSubs.results.2.content.split('.')[1] }}.{{ coreEuWest2PublicSubs.results.2.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-cicd-eu-west-2-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+##SS CICD EU-West-1 Subnets
+Host {{ ssEuWest1IntraSubs.results.1.content.split('.')[0] }}.{{ ssEuWest1IntraSubs.results.1.content.split('.')[1] }}.{{ ssEuWest1IntraSubs.results.1.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-cicd-eu-west-1-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+#Host {{ ssEuWest1PrivateSubs.results.1.content.split('.')[0] }}.{{ ssEuWest1PrivateSubs.results.1.content.split('.')[1] }}.{{ ssEuWest1PrivateSubs.results.1.content.split('.')[2] }}.*
+#     ProxyJump                %r@ss-cicd-eu-west-1-bastion
+#     StrictHostKeyChecking    no
+#     user                     ec2-user
+#     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+Host {{ ssEuWest1PublicSubs.results.1.content.split('.')[0] }}.{{ ssEuWest1PublicSubs.results.1.content.split('.')[1] }}.{{ ssEuWest1PublicSubs.results.1.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-cicd-eu-west-1-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+##SS CICD EU-West-2 Subnets
+Host {{ ssEuWest2IntraSubs.results.1.content.split('.')[0] }}.{{ ssEuWest2IntraSubs.results.1.content.split('.')[1] }}.{{ ssEuWest2IntraSubs.results.1.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-cicd-eu-west-2-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+#Host {{ ssEuWest2PrivateSubs.results.1.content.split('.')[0] }}.{{ ssEuWest2PrivateSubs.results.1.content.split('.')[1] }}.{{ ssEuWest2PrivateSubs.results.1.content.split('.')[2] }}.*
+#     ProxyJump                %r@ss-cicd-eu-west-2-bastion
+#     StrictHostKeyChecking    no
+#     user                     ec2-user
+#     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+Host {{ ssEuWest2PublicSubs.results.1.content.split('.')[0] }}.{{ ssEuWest2PublicSubs.results.1.content.split('.')[1] }}.{{ ssEuWest2PublicSubs.results.1.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-cicd-eu-west-2-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+
+
+### Prod Env Config ###
+##Prod Bastions
+Host ss-prod-eu-west-1-bastion
+     HostName                 {{ euwest1BastionIps.results.2.content | default('TBC', true) }}
+     StrictHostKeyChecking    no
+     ProxyCommand             none
+     CheckHostIP              no
+     ForwardAgent             yes
+     ServerAliveInterval      60
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+Host ss-prod-eu-west-2-bastion
+     HostName                 {{ euwest2BastionIps.results.2.content | default('TBC', true) }}
+     StrictHostKeyChecking    no
+     ProxyCommand             none
+     CheckHostIP              no
+     ForwardAgent             yes
+     ServerAliveInterval      60
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+##Core Prod EU-West-1 Subnets
+Host {{ coreEuWest1IntraSubs.results.3.content.split('.')[0] }}.{{ coreEuWest1IntraSubs.results.3.content.split('.')[1] }}.{{ coreEuWest1IntraSubs.results.3.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-prod-eu-west-1-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+Host {{ coreEuWest1PublicSubs.results.3.content.split('.')[0] }}.{{ coreEuWest1PublicSubs.results.3.content.split('.')[1] }}.{{ coreEuWest1PublicSubs.results.3.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-prod-eu-west-1-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+##Core Prod EU-West-2 Subnets
+Host {{ coreEuWest2IntraSubs.results.3.content.split('.')[0] }}.{{ coreEuWest2IntraSubs.results.3.content.split('.')[1] }}.{{ coreEuWest2IntraSubs.results.3.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-prod-eu-west-2-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+Host {{ coreEuWest2PublicSubs.results.3.content.split('.')[0] }}.{{ coreEuWest2PublicSubs.results.3.content.split('.')[1] }}.{{ coreEuWest2PublicSubs.results.3.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-prod-eu-west-2-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+#}
+##SS Prod EU-West-1 Subnets
+Host {{ ssEuWest1IntraSubs.results.2.content.split('.')[0] }}.{{ ssEuWest1IntraSubs.results.2.content.split('.')[1] }}.{{ ssEuWest1IntraSubs.results.2.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-prod-eu-west-1-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+#Host {{ ssEuWest1PrivateSubs.results.2.content.split('.')[0] }}.{{ ssEuWest1PrivateSubs.results.2.content.split('.')[1] }}.{{ ssEuWest1PrivateSubs.results.2.content.split('.')[2] }}.*
+#     ProxyJump                %r@ss-prod-eu-west-1-bastion
+#     StrictHostKeyChecking    no
+#     user                     ec2-user
+#     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+Host {{ ssEuWest1PublicSubs.results.2.content.split('.')[0] }}.{{ ssEuWest1PublicSubs.results.2.content.split('.')[1] }}.{{ ssEuWest1PublicSubs.results.2.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-prod-eu-west-1-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+##SS Prod EU-West-2 Subnets
+Host {{ ssEuWest2IntraSubs.results.2.content.split('.')[0] }}.{{ ssEuWest2IntraSubs.results.2.content.split('.')[1] }}.{{ ssEuWest2IntraSubs.results.2.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-prod-eu-west-2-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null
+#Host {{ ssEuWest2PrivateSubs.results.2.content.split('.')[0] }}.{{ ssEuWest2PrivateSubs.results.2.content.split('.')[1] }}.{{ ssEuWest2PrivateSubs.results.2.content.split('.')[2] }}.*
+#     ProxyJump                %r@ss-prod-eu-west-2-bastion
+#     StrictHostKeyChecking    no
+#     user                     ec2-user
+#     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+Host {{ ssEuWest2PublicSubs.results.2.content.split('.')[0] }}.{{ ssEuWest2PublicSubs.results.2.content.split('.')[1] }}.{{ ssEuWest2PublicSubs.results.2.content.split('.')[2] }}.*
+     ProxyJump                %r@ss-prod-eu-west-2-bastion
+     StrictHostKeyChecking    no
+     user                     ec2-user
+     IdentityFile             {{ myHome }}/.ssh/ec2-key.pem
+     UserKnownHostsFile       /dev/null

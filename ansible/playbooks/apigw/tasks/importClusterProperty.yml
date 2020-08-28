@@ -1,0 +1,62 @@
+#
+# Import a Cluster Wide Property
+#
+# Input vars:
+# - apigwMgmtEndpoint
+# - apigwUser
+# - apigwPassword
+# - clusterPropertyName
+# - clusterPropertyValue
+# Output vars:
+# - N/A
+
+# need to find out whether the CWP exists on the target gateway
+- name: "lookup Cluster Wide Property - {{ clusterPropertyName }}"
+  include_tasks: getClusterPropertyByName.yml
+- name: "parse lookup result"
+  delegate_to: localhost
+  connection: local
+  # can have zero or one result
+  failed_when: false
+  xml:
+    xmlstring: "{{ apigw_response_get_clusterproperty_by_name.content }}"
+    namespaces:
+      l7: "http://ns.l7tech.com/2010/04/gateway-management"
+    xpath: /l7:List/l7:Item/l7:Id
+    content: text
+  register: xmlResult
+- name: "Cluster Wide Property exists on target gateway - {{ clusterPropertyName }}"
+  set_fact:
+    clusterPropertyExists: true
+    clusterPropertyId: "{{ xmlResult.matches[0] | json_query('*') | json_query('[0]') }}"
+  when: 
+    - xmlResult.count is defined and xmlResult.count == 1 # there is a match by Name
+- name: "Cluster Wide Property does not exist on target gateway - {{ clusterPropertyName }}"
+  set_fact:
+    clusterPropertyExists: false
+  when: 
+    - xmlResult.count is not defined 
+- name: "Get current value of Cluster Wide Property - {{ clusterPropertyName }}"
+  delegate_to: localhost
+  connection: local
+  failed_when: false
+  xml:
+    xmlstring: "{{ apigw_response_get_clusterproperty_by_name.content }}"
+    namespaces:
+      l7: "http://ns.l7tech.com/2010/04/gateway-management"
+    xpath: /l7:List/l7:Item/l7:Resource/l7:ClusterProperty/l7:Value
+    content: text
+  register: xmlResult
+  when: clusterPropertyExists
+- name: "update existing Cluster Wide Property (only when its value changes) - {{ clusterPropertyName }}"
+  include_tasks: updateClusterProperty.yml
+  vars:
+    clusterPropertyPayload: "{{ lookup('template', 'templates/clusterProperty.j2') }}"
+  when:
+    - clusterPropertyExists 
+    - clusterPropertyValue != (xmlResult.matches[0] | json_query('*') | json_query('[0]'))
+- name: "create new Cluster Wide Property - {{ clusterPropertyName }}"
+  include_tasks: createClusterProperty.yml
+  vars:
+    clusterPropertyPayload: "{{ lookup('template', 'templates/clusterProperty.j2') }}"
+  when: not clusterPropertyExists 

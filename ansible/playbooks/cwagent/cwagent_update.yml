@@ -1,0 +1,22 @@
+######### Play 1: setup inventory #########
+
+- hosts: localhost
+  gather_facts: no
+  roles:
+  - role: ../../roles/generic_addHosts
+    vars:
+      consulKeyPath: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/{{ awsEnv | mandatory }}/terraform/{{ awsAcc | mandatory }}/outputs/{{ awsComp | mandatory }}/{{ awsRegion | mandatory }}/{{ awsCompPrivIps | mandatory }}_private_ips?raw"
+      groupName: "{{ groupName | mandatory }}"
+
+############ Play 2: Update Cloudwatch Config File Play #########
+
+- hosts: "{{ groupName }}"
+  remote_user: ec2-user
+  become_user: e0000010
+  become: true
+  vars_files:
+   - "../../vars_files/{{ groupName }}"
+  tasks:
+  - name: To update the cloudwatch agent config file
+    include_role:
+      name: ../../roles/generic_cwagent

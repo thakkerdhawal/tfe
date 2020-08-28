@@ -1,0 +1,26 @@
+#
+# Get cluster wide property by name
+#
+# Input vars:
+# - apigwMgmtEndpoint
+# - apigwUser
+# - apigwPassword
+# - clusterPropertyName
+# Output vars:
+# - apigw_response_get_clusterproperty_by_name
+#
+
+- name: "lookup cluster property by name"
+  uri:
+    url: '{{ apigwMgmtEndpoint }}/restman/1.0/clusterProperties?name={{ clusterPropertyName | urlencode }}'
+    method: GET
+    force_basic_auth: yes
+    user: "{{ apigwUser }}"
+    password: "{{ apigwPassword }}"
+    headers:
+      Content-Type: 'application/xml'
+    validate_certs: no
+    # this request always returns 200 even when there is no matching
+    status_code: 200
+    return_content: yes
+  register: apigw_response_get_clusterproperty_by_name

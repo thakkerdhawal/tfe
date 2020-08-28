@@ -1,0 +1,14 @@
+---
+# defaults file for generic_healthCheck
+
+debugMe: false
+theDelay: 10 #10 seconds
+theHost: "{{ ansible_default_ipv4.address }}"
+thePort: false
+theState: started
+theStatusCode: [200, 201, 202]
+theString: donotcheck
+theTimeout: 60 #60 seconds aka 1 minute
+theUrl: false
+allowFailure: false
+#

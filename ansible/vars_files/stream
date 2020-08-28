@@ -1,0 +1,25 @@
+streamUser: e0000005
+javaDest: /ecomm/java/
+streamDest: /ecomm/caplin/liberator/stream-agilemarkets/current/
+
+# role var - generic_afServerFileCopy
+afBase: https://artifactory-1.dts.fm.rbsgrp.net/artifactory/eComm-public-releases-local
+# role var - generic_cwagent
+cwagent_logging:
+  /ecomm/caplin/liberator/stream-agilemarkets/current/var/auth-rttpd.log:
+      log_group_name: stream_out
+  /ecomm/caplin/liberator/stream-agilemarkets/current/var/event-rttpd.log:
+      log_group_name: stream_out
+  /ecomm/caplin/liberator/stream-agilemarkets/current/var/java.log:
+      log_group_name: stream_out
+  /ecomm/caplin/liberator/stream-agilemarkets/current/var/gc.log:
+      log_group_name: stream_gc
+  /ecomm/caplin/liberator/stream-agilemarkets/current/var/http-access-rttpd.log:
+      log_group_name: stream_access
+  /ecomm/caplin/liberator/stream-agilemarkets/current/var/object-rttpd.log:
+      log_group_name: stream_object
+  /ecomm/caplin/liberator/stream-agilemarkets/current/var/request-rttpd.log:
+      log_group_name: stream_request
+  /ecomm/caplin/liberator/stream-agilemarkets/current/var/session-rttpd.log:
+      log_group_name: stream_session
+mon_ec2_namespace: "stream"

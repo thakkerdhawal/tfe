@@ -1,0 +1,5 @@
+<IfModule proxy_module>
+  ProxyPreserveHost On
+  ProxyPass /api/prime/ https://11.161.27.76:85/api/prime/
+  ProxyPassReverse /api/prime/ https://11.161.27.76:85/api/prime/
+</IfModule>

@@ -1,0 +1,23 @@
+---
+# tasks file for Splunk installation
+- name: "check for existing installation"
+  stat:
+    path: "{{ splunkHome }}"
+  register: pre_existing_splunk
+- name: "check version of existing installation"
+  lineinfile:
+    path: "{{ splunkHome }}/etc/splunk.version"
+    state: present
+    line: "VERSION={{ splunkVersion }}"
+  register: splunkInstalledVersion
+  when:  pre_existing_splunk.stat.exists
+- name: "set first run fact"
+  set_fact:
+    first_run: True
+  when: (not pre_existing_splunk.stat.exists) or splunkInstalledVersion.changed
+
+- include_tasks: install.yml
+  when: first_run 
+
+- include_tasks: configure.yml
+

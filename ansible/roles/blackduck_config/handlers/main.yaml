@@ -1,0 +1,16 @@
+---
+
+- name: Stop blackduck
+  listen: restart blackduck
+  command: /usr/local/bin/docker-compose -p {{blackduck_project_name}} down
+  args:
+    chdir: "{{blackduck_dir.stdout}}"
+  when: bd_running
+
+
+- name: Startup blackduck with ExternalDB
+  listen: restart blackduck
+  command: /usr/local/bin/docker-compose -f docker-compose.externaldb.yml -p hub up -d
+  args:
+    chdir: "{{blackduck_dir.stdout}}"
+

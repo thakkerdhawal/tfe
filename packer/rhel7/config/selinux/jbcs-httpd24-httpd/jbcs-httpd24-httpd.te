@@ -1,0 +1,19 @@
+policy_module(jbcs-httpd24-httpd, 1.0.0)
+
+# This example allows transitions from unconfined_t to httpd_t.
+# To add other user domains/types, add the type/role to the require
+# block below, and add a new domain_auto_trans and role line for
+# each.
+
+# Require the role and type that you'll be transitioning from
+require {
+    type unconfined_t;
+    role unconfined_r;
+    type httpd_exec_t;
+    type httpd_t;
+}
+# Transition unconfined_t to httpd_t
+domain_auto_trans(unconfined_t, httpd_exec_t, httpd_t);
+# Add the httpd_t type to the role so that it isn't
+# invalid after transitions
+role unconfined_r types httpd_t;

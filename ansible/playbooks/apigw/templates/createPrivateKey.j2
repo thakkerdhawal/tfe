@@ -1,0 +1,20 @@
+<l7:PrivateKeyCreationContext xmlns:l7="http://ns.l7tech.com/2010/04/gateway-management">
+   <l7:Dn>CN={{ KEYCN }}</l7:Dn>
+   <l7:Properties>
+       <l7:Property key="signatureHashAlgorithm">
+           <l7:StringValue>SHA256</l7:StringValue>
+       </l7:Property>
+       <l7:Property key="rsaKeySize">
+           <l7:IntegerValue>2048</l7:IntegerValue>
+       </l7:Property>
+       <l7:Property key="ecName">
+           <l7:StringValue>secp384r1</l7:StringValue>
+       </l7:Property>
+       <l7:Property key="daysUntilExpiry">
+           <l7:IntegerValue>365</l7:IntegerValue>
+       </l7:Property>
+       <l7:Property key="caCapable">
+           <l7:BooleanValue>false</l7:BooleanValue>
+       </l7:Property>
+   </l7:Properties>
+</l7:PrivateKeyCreationContext>

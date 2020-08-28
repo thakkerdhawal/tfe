@@ -1,0 +1,40 @@
+---
+# master playbook
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  roles:
+   - role: ../../roles/generic_addHosts
+     vars:
+      consulKeyPath: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/{{ env | lower | mandatory }}/terraform/shared-services/outputs/blackduck/eu-west-2/blackduck_private_ips?raw"
+      groupName: blackduck
+
+- hosts: blackduck
+  gather_facts: false
+  vars_files:
+   - ../../vars_files/blackduck
+  tasks:
+    - name: Lookup RDS Hostname in Consul
+      uri:
+        url: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/{{ env }}/terraform/shared-services/outputs/blackduck/eu-west-2/blackduck_rds?raw"
+        headers:
+          X-Consul-Token: "{{ consul_token }}"
+        return_content: true
+      register: rds_host
+      delegate_to: localhost
+      run_once: true
+
+    - name: Fail out if we can't find the RDS Entry in Consul
+      fail: msg="Can not find RDS entry in Consul"
+      when: not "'rds.amazonaws.com' in rds_host.content"
+
+- hosts: blackduck
+  become: true
+  vars_files:
+   - ../../vars_files/blackduck
+  roles:
+    - role: ../../roles/generic_ntp
+    - role: ../../roles/blackduck_config
+      become_user: centos
+   
+

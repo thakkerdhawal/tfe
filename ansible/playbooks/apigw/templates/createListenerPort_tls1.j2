@@ -1,0 +1,44 @@
+<l7:ListenPort xmlns:l7="http://ns.l7tech.com/2010/04/gateway-management">
+  <l7:Name>{{ PORTNAME | mandatory }}</l7:Name>
+  <l7:Enabled>true</l7:Enabled>
+  <l7:Protocol>HTTPS</l7:Protocol>
+  <l7:Port>{{ PORTNUMBER | mandatory }}</l7:Port>
+  <l7:EnabledFeatures>
+    <l7:StringValue>Published service message input</l7:StringValue>
+  </l7:EnabledFeatures>
+  <l7:TargetServiceReference id="{{ SERVICEID | mandatory }}" resourceUri="http://ns.l7tech.com/2010/04/gateway-management/services"/>
+  <l7:TlsSettings>
+    <l7:ClientAuthentication>Required</l7:ClientAuthentication>
+    <l7:PrivateKeyReference id="00000000000000000000000000000002:{{ KEYALIAS | mandatory }}" resourceUri="http://ns.l7tech.com/2010/04/gateway-management/privateKeys"/>
+    <l7:EnabledVersions>
+      <l7:StringValue>TLSv1</l7:StringValue>
+      <l7:StringValue>TLSv1.1</l7:StringValue>
+      <l7:StringValue>TLSv1.2</l7:StringValue>
+    </l7:EnabledVersions>
+    <l7:EnabledCipherSuites>
+      <l7:StringValue>TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256</l7:StringValue>
+      <l7:StringValue>TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256</l7:StringValue>
+      <l7:StringValue>TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256</l7:StringValue>
+      <l7:StringValue>TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256</l7:StringValue>
+      <l7:StringValue>TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384</l7:StringValue>
+      <l7:StringValue>TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384</l7:StringValue>
+      <l7:StringValue>TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384</l7:StringValue>
+      <l7:StringValue>TLS_RSA_WITH_AES_128_CBC_SHA</l7:StringValue>
+      <l7:StringValue>TLS_RSA_WITH_AES_256_CBC_SHA256</l7:StringValue>
+    </l7:EnabledCipherSuites>
+    <l7:Properties>
+      <l7:Property key="usesTLS">
+        <l7:BooleanValue>true</l7:BooleanValue>
+      </l7:Property>
+    </l7:Properties>
+  </l7:TlsSettings>
+  <l7:Properties>
+    <l7:Property key="Server">
+      <l7:StringValue>-</l7:StringValue>
+    </l7:Property>
+    <l7:Property key="useExtendedFtpCommandSet">
+      <l7:StringValue>false</l7:StringValue>
+    </l7:Property>
+  </l7:Properties>
+</l7:ListenPort>
+

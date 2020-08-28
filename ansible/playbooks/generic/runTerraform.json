@@ -1,0 +1,110 @@
+[
+      {
+        "index": 0,
+        "max": 30,
+        "min": 1,
+        "questionName": "awsComponent",
+        "required": true,
+        "type": "text",
+        "variable": "awsComponent"
+      },
+      {
+        "index": 1,
+        "max": 20,
+        "min": 1,
+        "questionName": "awsAccount",
+        "required": true,
+        "type": "text",
+        "variable": "awsAccount"
+      },
+      {
+        "index": 2,
+        "max": 20,
+        "min": 1,
+        "questionName": "awsEnv",
+        "required": true,
+        "type": "text",
+        "variable": "awsEnv"
+      },
+      {
+        "index": 3,
+        "max": 20,
+        "min": 1,
+        "questionName": "awsRegion",
+        "required": true,
+        "type": "text",
+        "variable": "awsRegion"
+      },
+      {
+        "index": 4,
+        "max": 100,
+        "min": 1,
+        "questionName": "consulTokenPassword",
+        "required": true,
+        "type": "password",
+        "variable": "consulTokenPassword"
+      },
+      {
+        "index": 5,
+        "max": 10,
+        "min": 1,
+        "questionName": "mailMe",
+        "required": true,
+        "type": "text",
+        "variable": "mailMe"
+      },
+      {
+        "index": 6,
+        "max": 100,
+        "min": 1,
+        "questionName": "mailTo",
+        "required": true,
+        "type": "text",
+        "variable": "mailTo"
+      },
+      {
+        "index": 7,
+        "max": 10,
+        "min": 1,
+        "questionName": "tooling",
+        "required": true,
+        "type": "text",
+        "variable": "tooling"
+      },
+      {
+        "index": 8,
+        "max": 20,
+        "min": 1,
+        "questionName": "tfAction",
+        "required": true,
+        "type": "text",
+        "variable": "tfAction"
+      },
+      {
+        "index": 9,
+        "max": 50,
+        "min": 1,
+        "questionName": "tfCmd",
+        "required": true,
+        "type": "text",
+        "variable": "tfCmd"
+      },
+      {
+        "index": 10,
+        "max": 10,
+        "min": 1,
+        "questionName": "tfPlan",
+        "required": true,
+        "type": "text",
+        "variable": "tfPlan"
+      },
+      {
+        "index": 11,
+        "max": 10,
+        "min": 1,
+        "questionName": "debugMe",
+        "required": true,
+        "type": "text",
+        "variable": "debugMe"
+      }
+]

@@ -1,0 +1,31 @@
+CICD Environments:
+
+1)	terraform-application-nwm-cicd
+
+
+    ADD:
+    key "APPLICATION/NWM/" { policy = "read" }
+    key "APPLICATION/NWM/CICD/TERRAFORM/CORE/" { policy = "write" }
+    session "APPLICATION/NWM/CICD/TERRAFORM/CORE/" { policy = "write" }
+    agent "" { policy = "read" }
+
+2)	terraform-application-nwm-cicd-variables
+
+    ADD:
+    key "APPLICATION/NWM/CICD/VARIABLES/CORE/" { policy = "write" }
+
+3)	terraform-application-sharedservices-cicd
+
+    
+    ADD:
+    key "APPLICATION/NWM/" { policy = "read" }
+    key "APPLICATION/NWM/CICD/TERRAFORM/SHARED-SERVICES/" { policy = "write" }
+    session "APPLICATION/NWM/CICD/TERRAFORM/SHARED-SERVICES/" { policy = "write" }
+    agent "" { policy = "read" }
+
+
+4)	terraform-application-sharedservices-cicd-variables
+
+
+    ADD:
+    key "APPLICATION/NWM/CICD/VARIABLES/SHARED-SERVICES/" { policy = "write" }

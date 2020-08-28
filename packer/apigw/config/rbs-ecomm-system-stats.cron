@@ -1,0 +1,2 @@
+# Run stats every minute
+* * * * * root /usr/bin/wget -q --no-check-certificate https://127.0.0.1:8443/system/stats -O /dev/null > /dev/null 2>&1

@@ -1,0 +1,10 @@
+- name: "Health Check"
+  include_role:
+    name: ../../roles/generic_healthCheck
+  vars:
+    theUrl: "{{ item.url }}"
+    theString: "{{ item.string }}"
+  loop:
+    - { "url": "https://{{ ansible_default_ipv4.address }}:8443/ssg/ping", "string": "OK" }
+    - { "url": "https://{{ ansible_default_ipv4.address }}:9443/check/wsg/local", "string": "donotcheck" }
+

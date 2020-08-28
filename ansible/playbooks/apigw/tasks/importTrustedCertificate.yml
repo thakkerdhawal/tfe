@@ -1,0 +1,62 @@
+#
+# Import (create or update) a single Trusted Certificate
+#
+# Input vars:
+# - apigwMgmtEndpoint
+# - apigwUser
+# - apigwPassword
+# - forceUpdate
+# - trustedCertificateData: base64 encoded section in the PEM file
+# - trustedCertificateName
+# - trustedCertificateProperties: list of properties to enable
+# Output vars:
+# - N/A
+
+# need to find out whether the Trusted Certificate exists on the target gateway
+- debug: msg="forceUpdate is {{ forceUpdate }}"
+- name: "lookup Trusted Certificate - {{ trustedCertificateName }}"
+  include_tasks: getTrustedCertificateByName.yml
+- name: "parse lookup result"
+  delegate_to: localhost
+  connection: local
+  # can have zero or one result
+  failed_when: false
+  xml:
+    xmlstring: "{{ apigw_response_get_trustedcertificate_by_name.content }}"
+    namespaces:
+      l7: "http://ns.l7tech.com/2010/04/gateway-management"
+    xpath: /l7:List/l7:Item/l7:Id
+    content: text
+  register: xmlResult
+- name: "Trusted Certificate does not exist on target gateway - {{ trustedCertificateName }}"
+  set_fact:
+    trustedCertificateExists: false
+  when: 
+    - xmlResult.count is not defined 
+- name: "Trusted Certificate exists on target gateway - {{ trustedCertificateName }}"
+  set_fact:
+    trustedCertificateExists: true
+  when: 
+    - xmlResult.count is defined and xmlResult.count == 1 # there is a match by Name
+
+- name: "Set certificate properties - {{ trustedCertificateName }}"
+  set_fact: { "{{ propertyKey }}": true }
+  loop: "{{ trustedCertificateProperties }}"
+  loop_control:
+    loop_var: propertyKey
+  when: not trustedCertificateExists or forceUpdate | bool
+
+- name: "update existing Trusted Certificate (forceUpdate=true) - {{ trustedCertificateName }}"
+  include_tasks: updateTrustedCertificate.yml
+  vars:
+    trustedCertificatePayload: "{{ lookup('template', 'templates/trustedCertificate.j2') }}"
+    trustedCertificateId: "{{ xmlResult.matches[0] | json_query('*') | json_query('[0]') }}"
+  when:
+    - trustedCertificateExists and forceUpdate | bool
+
+- name: "create new Trusted Certificate - {{ trustedCertificateName }}"
+  include_tasks: createTrustedCertificate.yml
+  vars:
+    trustedCertificatePayload: "{{ lookup('template', 'templates/trustedCertificate.j2') }}"
+  when: not trustedCertificateExists
+

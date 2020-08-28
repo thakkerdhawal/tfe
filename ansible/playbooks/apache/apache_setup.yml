@@ -1,0 +1,39 @@
+######### Play 1 #########
+- hosts: localhost
+  gather_facts: no
+  tasks:
+   - name: add list of hosts 
+     include_role:
+      name: ../../roles/generic_addHosts
+     vars:
+       consulKeyPath: "https://ecomm.fm.rbsgrp.net/v1/kv/application/nwm/{{ awsEnv | mandatory }}/terraform/core/outputs/agilemarkets/{{ awsRegion | mandatory }}/apache_instances_private_ips?raw"
+       groupName: apache
+
+- hosts: apache
+  vars_files:
+   - ../../vars_files/apache
+  pre_tasks:
+   - name: "set correct apache user based on instance name"
+     set_fact:
+        apacheUser: "{{ 'e0000005' if (apacheInstanceName == 'agilemarkets') else 'e0000006' }}"
+        theUser: "{{ 'e0000005' if (apacheInstanceName == 'agilemarkets') else 'e0000006' }}"
+        apacheGroup: "{{ 'e0000005' if (apacheInstanceName == 'agilemarkets') else 'e0000006' }}"
+  remote_user: ec2-user 
+  become_user: "{{ apacheUser }}" 
+  become: true
+  roles:
+    - ../../roles/generic_afServerFileCopy
+    - ../../roles/apache_deploy
+    - ../../roles/generic_cwagent
+  tasks:
+  - meta: flush_handlers
+  - name: "run health check"
+    include_role:
+      name: ../../roles/generic_healthCheck
+    vars:
+      thePort: "{{ apachePort }}"
+
+
+
+
+

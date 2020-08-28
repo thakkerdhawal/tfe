@@ -1,0 +1,47 @@
+[
+      {
+        "index": 0,
+        "max": 30,
+        "min": 1,
+        "questionName": "awsEnv",
+        "required": true,
+        "type": "text",
+        "variable": "awsEnv"
+      },
+      {
+        "index": 1,
+        "max": 30,
+        "min": 1,
+        "questionName": "state",
+        "required": true,
+        "type": "text",
+        "variable": "state"
+      },
+      {
+        "index": 2,
+        "max": 30,
+        "min": 1,
+        "questionName": "serviceName",
+        "required": true,
+        "type": "text",
+        "variable": "serviceName"
+      },
+      {
+        "index": 3,
+        "max": 150,
+        "min": 1,
+        "questionName": "consulKey",
+        "required": false,
+        "type": "text",
+        "variable": "consulKey"
+      },
+      {
+        "index": 4,
+        "max": 30,
+        "min": 1,
+        "questionName": "targetHosts",
+        "required": false,
+        "type": "text",
+        "variable": "targetHosts"
+      }
+]

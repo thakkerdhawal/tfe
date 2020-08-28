@@ -1,0 +1,26 @@
+#
+# Get folder by name
+#
+# Input vars:
+# - apigwMgmtEndpoint
+# - apigwUser
+# - apigwPassword
+# - folderName
+# - parentFolderId
+# Output vars:
+# - apigw_response_get_folder
+#
+
+- name: "lookup folder by name"
+  uri:
+    url: '{{ apigwMgmtEndpoint }}/restman/1.0/folders?name={{ folderName | urlencode }}&parentFolder.id={{ parentFolderId }}'
+    method: GET
+    force_basic_auth: yes
+    user: "{{ apigwUser }}"
+    password: "{{ apigwPassword }}"
+    headers:
+      Content-Type: 'application/xml'
+    validate_certs: no
+    status_code: 200
+    return_content: yes
+  register: apigw_response_get_folder

@@ -1,0 +1,15 @@
+# role var - generic_afServerFileCopy
+theUser: e0000011
+
+# role var - splunk_install
+splunkPackageUrl: "https://artifactory-1.dts.fm.rbsgrp.net/artifactory/eComm-public-releases-local/Splunk/enterprise/splunk-7.2.3-06d57c595b80-Linux-x86_64.tgz"
+splunkAddonUrl: "https://artifactory-1.dts.fm.rbsgrp.net/artifactory/eComm-public-releases-local/Splunk/splunkforwarder/apps/splunk-add-on-for-amazon-web-services_460.tgz"
+splunkVersion: 7.2.3
+splunkCACertFile: rbsca.pem
+splunkCertPassword: dummyCertForTesting
+splunkHttpPort: 8443
+splunkMgmtPort: 8089
+
+# role var - generic_cwagent
+update_cwagent_logs: "false"
+mon_ec2_namespace: "splunk"

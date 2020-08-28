@@ -1,0 +1,26 @@
+#
+# Get Trusted Certificate by name
+#
+# Input vars:
+# - apigwMgmtEndpoint
+# - apigwUser
+# - apigwPassword
+# - trustedCertificateName
+# Output vars:
+# - apigw_response_get_trustedcertificate_by_name
+#
+
+- name: "lookup trusted certificate by name"
+  uri:
+    url: '{{ apigwMgmtEndpoint }}/restman/1.0/trustedCertificates?name={{ trustedCertificateName | urlencode }}'
+    method: GET
+    force_basic_auth: yes
+    user: "{{ apigwUser }}"
+    password: "{{ apigwPassword }}"
+    headers:
+      Content-Type: 'application/xml'
+    validate_certs: no
+    # this request always returns 200 even when there is no matching
+    status_code: 200
+    return_content: yes
+  register: apigw_response_get_trustedcertificate_by_name

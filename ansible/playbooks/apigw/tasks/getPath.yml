@@ -1,0 +1,22 @@
+#
+# Note: This playbook is created for looping through multiple tasks and is meant to be called from a main playbook using 'include_tasks' and 'with_items'
+# Ref - https://docs.ansible.com/ansible/latest/user_guide/playbooks_loops.html#loop-control
+#
+- include_tasks: getFolder.yml
+  vars:
+    # {{ item }} commes from the parent playbook, which includes this playbook in a loop
+    folderName: "{{ item }}"
+    parentFolderId: "{{ currentParentFolderId }}"
+- name: "check whether folder {{ item }} exists"
+  delegate_to: localhost
+  connection: local
+  xml:
+    xmlstring: "{{ apigw_response_get_folder.content }}"
+    namespaces:
+      l7: "http://ns.l7tech.com/2010/04/gateway-management"
+    xpath: /l7:List/l7:Item/l7:Id
+    content: text
+  register: xmlResult
+- name: "prepare next lookup"
+  set_fact:
+    currentParentFolderId: "{{ xmlResult.matches[0] | json_query('*') | json_query('[0]') }}"

@@ -1,0 +1,90 @@
+---
+
+- name: Get running blackduck version
+  command: docker ps -q -f label=com.docker.compose.service=webapp --format {%raw%}'{{.Label "com.blackducksoftware.hub.version"}}'{%endraw%}
+  register: blackduck_version_run
+
+- name: Was blackduck running?
+  set_fact:
+    bd_running: "{{ blackduck_version_run.stdout != '' }}"
+
+- name: If not running get the latest version we can see in the directory
+  shell: ls -tr /home/centos/hub-*/docker-compose/README.md | tail -1 |  sed 's/.*-\(.*\)\/docker-compose\/README.md/\1/'
+  register: blackduck_version_dir
+  when: not bd_running
+
+- name: Set blackduck version fact
+  set_fact:
+    blackduck_version: "{{blackduck_version_run.stdout or blackduck_version_dir.stdout}}"
+
+- name: Get running blackduck docker compose project
+  command: docker ps -q -f label=com.docker.compose.service=webapp --format {%raw%}'{{.Label "com.docker.compose.project"}}'{%endraw%}
+  register: blackduck_project
+  when: bd_running
+
+- name: Set project name fact
+  set_fact:
+    blackduck_project_name: "{{blackduck_project.stdout|default('hub', true)}}"
+
+- name: Get Blackduck docker compose source directory
+  shell: ls -d /home/centos/hub{-docker-,-}{{blackduck_version}}/docker-compose/
+  register: blackduck_dir
+  ignore_errors: yes
+
+- name: Check expected docker compose files exist
+  stat: path={{blackduck_dir.stdout}}docker-compose.externaldb.yml
+  register: bd_docker_externaldb
+
+- name: Fail out if we can't find the correct docker compose file tested above
+  fail: msg="Can not find docker-compose.externaldb.yml file in {{blackduck_dir.stdout}}"
+  when: bd_docker_externaldb.stat.exists == False
+
+# Having an issue with SSL trust to the RDS so don't enable SSL for now
+#- name: Enable Postgres SSL
+#  lineinfile:
+#    path: "{{blackduck_dir.stdout}}hub-postgres.env"
+#    regexp: "^HUB_POSTGRES_ENABLE_SSL="
+#    line: 'HUB_POSTGRES_ENABLE_SSL="true"'
+#  notify: restart blackduck
+
+- name: Add RDS Host to config
+  lineinfile:
+    path: "{{blackduck_dir.stdout}}hub-postgres.env"
+    regexp: "^HUB_POSTGRES_HOST"
+    line: "HUB_POSTGRES_HOST={{rds_host.content}}"
+  notify: restart blackduck
+  
+- name: Add Volume to docker compose yaml file 
+  replace:
+    path: "{{blackduck_dir.stdout}}docker-compose.externaldb.yml"
+    regexp: 'secrets-volume:\/run'
+    replace: "/home/centos/dbsecrets:/run"
+  notify: restart blackduck
+ 
+- name: Create blackduck db file directory
+  file:
+    path: /home/centos/dbsecrets
+    state: directory
+
+- name: Create blackduck db admin password file
+  copy:
+    content: "{{ blackduck_db_pass }}"
+    dest: /home/centos/dbsecrets/HUB_POSTGRES_ADMIN_PASSWORD_FILE
+    mode: 0644
+  notify: restart blackduck
+
+- name: Create blackduck db user password file
+  copy:
+    content: "{{ blackduck_db_user_pass }}"
+    dest: /home/centos/dbsecrets/HUB_POSTGRES_USER_PASSWORD_FILE
+    mode: 0644
+  notify: restart blackduck
+
+- name: Set logstash heapsize to 2048m based off Blackduck support recommendations (Case 00708684)
+  lineinfile:
+    path: "{{blackduck_dir.stdout}}docker-compose.externaldb.yml"
+    regexp: '    mem_limit: 1024m'
+    line: "    mem_limit: 2048m"
+    insertafter: 'logstash:'
+  notify: restart blackduck
+

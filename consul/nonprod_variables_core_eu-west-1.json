@@ -1,0 +1,77 @@
+[
+        {
+                "flags": 0,
+                "key": "application/nwm/nonprod/variables/core/eu-west-1/",
+                "value": ""
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/nonprod/variables/core/eu-west-1/az_number",
+                "value": "3"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/nonprod/variables/core/eu-west-1/dx_amazonaddress",
+                "value": "11.211.3.138/30,11.211.5.138/30"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/nonprod/variables/core/eu-west-1/dx_connectionid",
+                "value": "dxcon-fgz77ysc,dxcon-fgd2sfcx"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/nonprod/variables/core/eu-west-1/dx_customeraddress",
+                "value": "11.211.3.137/30,11.211.5.137/30"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/nonprod/variables/core/eu-west-1/dx_vlan",
+                "value": "313,1"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/nonprod/variables/core/eu-west-1/peervpc_name",
+                "value": "prod-vpc"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/nonprod/variables/core/eu-west-1/intra_subnets",
+                "value": "10.8.8.0/27,10.8.8.32/27,10.8.8.64/27"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/nonprod/variables/core/eu-west-1/public_subnets",
+                "value": "10.8.9.0/27,10.8.9.32/27,10.8.9.64/27"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/nonprod/variables/core/eu-west-1/stream_certs_agilemarkets.arns",
+                "value": "arn:aws:acm:eu-west-1:106756092552:certificate/dd1bfd00-627b-42c2-bc21-a9122b64f714,arn:aws:acm:eu-west-1:106756092552:certificate/08c88dbe-9ffc-4f42-a05b-0f7ff94bb94d,arn:aws:acm:eu-west-1:106756092552:certificate/85aab180-5251-451f-a81f-6ab4015a2240"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/nonprod/variables/core/eu-west-1/vpc_cidr",
+                "value": "10.8.8.0/23"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/nonprod/variables/core/eu-west-1/waf_ruleset_group",
+                "value": "452f316e-fba5-4980-ad43-9271919ed72d"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/nonprod/variables/core/eu-west-1/agilemarket_www_cert.arn",
+                "value": "arn:aws:acm:eu-west-1:106756092552:certificate/0988359d-b8ee-42f6-b24b-1ca8f0692bea"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/nonprod/variables/core/eu-west-1/bondsyndicate_cert.arn",
+                "value": "arn:aws:acm:eu-west-1:106756092552:certificate/a2e1fcdc-b092-41dd-8f93-fbb7e6e1cf8a"
+        },
+        {
+                "flags": 0,
+                "key": "application/nwm/nonprod/variables/core/eu-west-1/currencypay_cert.arn",
+                "value": "arn:aws:acm:eu-west-1:106756092552:certificate/4d1b65a0-3830-4e6e-a138-3d98c6308d88"
+        }
+]

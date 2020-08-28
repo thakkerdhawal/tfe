@@ -1,0 +1,313 @@
+#
+# Migrate a Serivce (update or create)
+#
+# Input vars:
+# - apigwMgmtEndpoint
+# - apigwUser
+# - apigwPassword
+# - serviceSourceRepo
+# - serviceTempPath
+# - rootFolderId
+# - targetFolder
+# - serviceName
+# - serviceExportVersion
+# - migrationSummary
+# Output vars:
+# - N/A
+#
+
+- name: "Block: variables"
+  block:
+  - name: "set initial variables"
+    set_fact:
+      serviceXmlFileName: "{{ serviceName }}-{{ serviceExportVersion }}.xml"
+      exportedServiceXml: "{{ serviceTempPath }}/{{ serviceName }}-{{ serviceExportVersion }}.xml"
+      serviceMatchedById: false
+      serviceMatchedByName: false
+      updateNotRequired: false
+      migrationSummary: "{{ migrationSummary | combine({ serviceName : 'FAILED - unexpected error.' }) }}"
+
+- name: "Block: download and parse source XML"
+  block:
+  - name: "download service definition XML from Artifactory"
+    get_url:
+      url: "{{ serviceSourceRepo }}/{{ serviceXmlFileName | urlencode }}"
+      dest: "{{ exportedServiceXml }}"
+      validate_certs: no
+  - name: "get service name from service definition XML"
+    xml:
+      path: "{{ exportedServiceXml }}"
+      namespaces:
+        l7: "{{ apigwXmlNamespace }}"
+      xpath: //l7:Service/l7:ServiceDetail/l7:Name
+      content: text
+    register: xmlResult
+  - name: "checkpoint: validate service name"
+    block:
+    - set_fact:
+        migrationSummary: "{{ migrationSummary | combine({ serviceName : 'FAILED - target service name does not match the name in exported XML' }) }}"
+    - fail:
+        msg: "ERROR: target service name does not match the name in exported XML. Please fix the source XML."
+    when: serviceName != xmlResult.matches[0] | dict2items | json_query('[0].value')
+  - name: "get service id from service definition XML"
+    xml:
+      path: "{{ exportedServiceXml }}"
+      namespaces:
+        l7: "{{ apigwXmlNamespace }}"
+      xpath: //l7:Service
+      content: attribute
+    register: xmlResult
+  - name: "set variable serviceId"
+    set_fact:
+      serviceId: "{{ xmlResult.matches[0] | dict2items | json_query('[0].value.id') }}"
+  - debug:
+      msg: "Processing service {{ serviceName }} - {{ serviceId }}"
+  - name: "set variable servicePayload"
+    set_fact:
+      # make sure XML namespace is set
+      # servicePayload: "{{ lookup('file', exportedServiceXml) | regex_replace('(?s).*(<l7:Service )(xmlns[^ ]*)*(.*</l7:Service>).*','\\1xmlns:l7=\"{{ apigwXmlNamespace }}\" \\3') }}"
+      servicePayload: "{{ lookup('file', exportedServiceXml) | regex_replace(searchPattern, replaceString) }}"
+    vars:
+      searchPattern: "(?s).*(<l7:Service )(xmlns[^ ]*)*(.*</l7:Service>).*"
+      replaceString: "\\1xmlns:l7=\"{{ apigwXmlNamespace }}\" \\3"
+  delegate_to: localhost
+  connection: local
+  become: false
+  run_once: true
+
+- name: "Block: validate the service on target Gateway by both service ID and Name"
+  block:
+  - name: "Child task: find folder on target Gateway - /SecurityServices"
+    include_tasks: tasks/getFolder.yml
+    vars:
+      folderName: "{{ targetFolder }}"
+      parentFolderId: "{{ rootFolderId }}"
+  - name: "check whether folder /SecurityServices exists"
+    delegate_to: localhost
+    connection: local
+    xml:
+      xmlstring: "{{ apigw_response_get_folder.content }}"
+      namespaces:
+        l7: "{{ apigwXmlNamespace }}"
+      xpath: /l7:List/l7:Item/l7:Id
+      content: text
+    register: xmlResult
+  - name: "set variable folderId"
+    set_fact:
+      folderId: "{{ xmlResult.matches[0] | dict2items | json_query('[0].value') }}"
+  - name: "Child task: search for service on target Gateway by its ID - {{ serviceId }}"
+    include_tasks: tasks/getServiceById.yml
+  - name: "set variable serviceMatchedById when there is a match"
+    set_fact:
+      serviceMatchedById: true
+    when: apigw_response_get_service_by_id.status == 200
+  - name: "Child task: search for service on target Gateway by its name - {{ serviceName }}"
+    include_tasks: tasks/getServiceByName.yml
+  - name: "count the number of matched services"
+    delegate_to: localhost
+    connection: local
+    xml:
+      xmlstring: "{{ apigw_response_get_service_by_name.content }}"
+      namespaces:
+        l7: "{{ apigwXmlNamespace }}"
+      xpath: /l7:List/l7:Item
+      count: yes
+    register: xmlResult
+  - name: "Checkpoint: there should not be multiple services with same name"
+    block:
+    - set_fact:
+        migrationSummary: "{{ migrationSummary | combine({ serviceName : 'FAILED - found multiple services with same name' }) }}"
+    - fail:
+        msg: "ERROR: found multiple services named {{ serviceName }}"
+    when: xmlResult.count > 1     # can have zero or multiple result as name is not unique
+  - name: "set variable serviceMatchedByName when there is one match"
+    set_fact:
+      serviceMatchedByName: true
+    when: xmlResult.count == 1
+
+# Scenario 1
+- name: "Block: both ID and name match are found"
+  block:
+  - name: "when both ID and name match are found - check whether they are the same"
+    delegate_to: localhost
+    connection: local
+    xml:
+      xmlstring: "{{ apigw_response_get_service_by_name.content }}"
+      namespaces:
+        l7: "{{ apigwXmlNamespace }}"
+      xpath: /l7:List/l7:Item/l7:Id
+      content: text
+    register: xmlResult
+  - name: "Checkpoint: service ID and name should match one same service"
+    block:
+    - set_fact:
+        migrationSummary: "{{ migrationSummary | combine({ serviceName : 'FAILED - different services were found that match ID and name respectively' }) }}"
+    - fail:
+        msg: "ERROR: different services were found that match ID and name respectively"
+    when: serviceId != xmlResult.matches[0] | dict2items | json_query('[0].value')
+  - debug:
+      msg: "Found service {{ serviceName }} - {{ serviceId }} on target Gateway"
+  # Check for update using serviceExportVersion
+  - name: "Child task: get the active service version"
+    include_tasks: tasks/getActiveServiceVersion.xml
+  - name: "extract current service export version from comment"
+    delegate_to: localhost
+    connection: local
+    xml:
+      xmlstring: "{{ apigw_response_get_active_service_version.content }}"
+      namespaces:
+        l7: "{{ apigwXmlNamespace }}"
+      xpath: //l7:Item/l7:Resource/l7:PolicyVersion/l7:comment
+      content: text
+    register: xmlResult
+    ignore_errors: true     # allow empty comment
+  - name: "set variable updateNotRequired to true and skip furture processing"
+    set_fact: 
+      updateNotRequired: true
+      migrationSummary: "{{ migrationSummary | combine({ serviceName : 'SKIPPED - version ' + serviceExportVersion + ' has already been migrated.' }) }}"
+    when: 
+      - xmlResult is succeeded 
+      - serviceExportVersion == xmlResult.matches[0] | dict2items | json_query('[0].value')
+      - forceUpdate | bool == false
+  when: 
+    - serviceMatchedById == true
+    - serviceMatchedByName == true
+
+# Scenario 2
+- name: "Block: only ID match is found - service name will be overwritten upon updated"
+  block:
+  - debug: 
+      msg: "found service matching ID {{ serviceId }} on target Gateway with different name"
+  - name: "Checkpoint: can not overwrite serivce name unless forceUpdate is true"
+    block:
+    - set_fact:
+        migrationSummary: "{{ migrationSummary | combine({ serviceName : 'FAILED - service name does not match. Set forceUpdate=true to overwrite' }) }}"
+    - fail:
+        msg: "ERROR: service name does not match. Set forceUpdate=true to overwrite"
+    when: forceUpdate | bool == false
+  when: 
+    - serviceMatchedById == true
+    - serviceMatchedByName == false
+
+# Scenario 3
+- name: "Block: only name match is found - service needs to be deleted before update"
+  block:
+  - debug: 
+      msg: "found service matching name {{ serviceName }} on target Gateway with different ID"
+  - name: "Checkpoint: can not overwrite serivce ID unless forceUpdate is true"
+    block:
+    - set_fact:
+        migrationSummary: "{{ migrationSummary | combine({ serviceName : 'FAILED - service ID does not match. Set forceUpdate=true to overwrite' }) }}"
+    - fail:
+        msg: "ERROR: service ID does not match. Set forceUpdate=true to overwrite"
+    when: forceUpdate | bool == false
+  - name: "extract service ID on target Gateway"
+    xml:
+      xmlstring: "{{ apigw_response_get_service_by_name.content }}"
+      namespaces:
+        l7: "{{ apigwXmlNamespace }}"
+      xpath: /l7:List/l7:Item/l7:Id
+      content: text
+    register: xmlResult
+    delegate_to: localhost
+    connection: local
+  - name: "Child task: delete existing service"
+    include_tasks: tasks/deleteService.yml
+    vars:
+      serviceId: "{{ xmlResult.matches[0] | dict2items | json_query('[0].value') }}"
+    when: forceUpdate | bool == true
+  when: 
+    - serviceMatchedById == false
+    - serviceMatchedByName == true
+
+# Scenario 4
+- name: "Block: service not found - will create new"
+  block:
+  - debug: 
+      msg: "Could not find the service on target Gateway. A new service will be created"
+  when: 
+    - serviceMatchedById == false
+    - serviceMatchedByName == false
+
+# Update service version in payload when updating an existing service
+- name: "Block: prepare the payload - set serviceVersion"
+  block:
+  - name: "extract service version"
+    delegate_to: localhost
+    connection: local
+    xml:
+      xmlstring: "{{ apigw_response_get_service_by_id.content }}"
+      namespaces:
+        l7: "{{ apigwXmlNamespace }}"
+      xpath: //l7:Service/l7:ServiceDetail
+      content: attribute
+    register: xmlResult
+  - name: "set variable serviceVersion and serviceFolderId"
+    set_fact:
+      serviceVersion: "{{ xmlResult.matches[0] | dict2items | json_query('[0].value.version') }}"
+      serviceFolderId: "{{ xmlResult.matches[0] | dict2items | json_query('[0].value.folderId') }}"
+  - name: "Child task: delete existing service if it is under the wrong folder"
+    include_tasks: tasks/deleteService.yml
+    when: serviceFolderId != folderId
+  - name: "set serviceVersion number for Service element"
+    delegate_to: localhost
+    connection: local
+    xml:
+      xmlstring: "{{ servicePayload }}"
+      namespaces:
+        l7: "{{ apigwXmlNamespace }}"
+      xpath: /l7:Service
+      attribute: version
+      value: "{{ serviceVersion }}"
+    register: xmlResult
+  - name: "set serviceVersion number for ServiceDetail element"
+    delegate_to: localhost
+    connection: local
+    xml:
+      xmlstring: "{{ xmlResult.xmlstring }}"
+      namespaces:
+        l7: "{{ apigwXmlNamespace }}"
+      xpath: /l7:Service/l7:ServiceDetail
+      attribute: version
+      value: "{{ serviceVersion }}"
+    register: xmlResult
+  - name: "set variable servicePayload with updated serviceVersion"
+    set_fact:
+      servicePayload: "{{ xmlResult.xmlstring }}"
+  when: 
+    - serviceMatchedById == true
+    - updateNotRequired == false
+
+# Update folder Id in payload
+- name: "Block: prepare the payload - set folderId"
+  block:
+  - name: "set target folder Id"
+    delegate_to: localhost
+    connection: local
+    xml:
+      xmlstring: "{{ servicePayload }}"
+      namespaces:
+        l7: "{{ apigwXmlNamespace }}"
+      xpath: /l7:Service/l7:ServiceDetail
+      attribute: folderId
+      value: "{{ folderId }}"
+    register: xmlResult
+  - name: "set variable servicePayload with updated folderId"
+    set_fact:
+      servicePayload: "{{ xmlResult.xmlstring }}"
+  when: updateNotRequired == false
+
+# Create or update the service
+- name: "Block: make the request to create or update the service"
+  block:
+  - name: "Child tasks: service update"
+    include_tasks: tasks/updateService.yml
+  - name: "Child tasks: set service active version comment to serviceExportVersion"
+    include_tasks: tasks/setServiceActiveVersionComment.yml
+    vars:
+      versionComment: "{{ serviceExportVersion }}"
+  - name: "set variable migrationSummary to update migration result of service - {{ serviceName }}"
+    set_fact:
+      migrationSummary: "{{ migrationSummary | combine({ serviceName : 'UPDATED' }) }}"
+  when: updateNotRequired == false
+
